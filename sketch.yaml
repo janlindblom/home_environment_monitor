@@ -1,7 +1,7 @@
 profiles:
   pico:
     notes: Default profile, will work on Pico W.
-    fqbn: rp2040:rp2040:rpipicow:flash=2097152_0,freq=133,opt=Fast,rtti=Enabled,stackprotect=Enabled,exceptions=Enabled,wificountry=finland,ipbtstack=ipv4btcble,usbstack=picosdk
+    fqbn: rp2040:rp2040:rpipicow:flash=2097152_65536,freq=133,opt=Small,rtti=Disabled,stackprotect=Enabled,exceptions=Enabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk,wificountry=finland,ipbtstack=ipv4btcble,uploadmethod=default
     platforms:
       - platform: rp2040:rp2040 (3.1.1)
         platform_index_url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
@@ -11,8 +11,8 @@ profiles:
       - Adafruit SSD1306 (2.5.7)
       - Adafruit BusIO (1.14.1)
   pico-debug:
-    notes: Default profile, will work on Pico W.
-    fqbn: rp2040:rp2040:rpipicow:flash=2097152_0,freq=133,rtti=Enabled,stackprotect=Enabled,exceptions=Enabled,dbgport=Serial,dbglvl=All,usbstack=picosdk,wificountry=finland,ipbtstack=ipv4btcble,uploadmethod=picoprobe
+    notes: Debug profile, will work on Pico W.
+    fqbn: rp2040:rp2040:rpipicow:flash=2097152_65536,freq=133,opt=Debug,rtti=Disabled,stackprotect=Enabled,exceptions=Enabled,dbgport=Serial,dbglvl=All,usbstack=picosdk,wificountry=finland,ipbtstack=ipv4btcble,uploadmethod=default
     platforms:
       - platform: rp2040:rp2040 (3.1.1)
         platform_index_url: https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json

@@ -1,0 +1,7 @@
+{
+  "arduino.additionalUrls": [
+    "https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json"
+  ],
+  "arduino.analyzeOnSettingChange": true,
+  "C_Cpp.default.configurationProvider": "vsciot-vscode.vscode-arduino"
+}

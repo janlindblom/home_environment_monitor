@@ -13,13 +13,13 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: 'false'
 BinPackArguments: 'true'
 BinPackParameters: 'true'
-ColumnLimit: '1000'
+ColumnLimit: '120'
 IndentCaseLabels: 'true'
 IndentPPDirectives: AfterHash
-IndentWidth: '4'
+IndentWidth: '2'
 MaxEmptyLinesToKeep: '1'
 PointerAlignment: Right
-SortIncludes: 'false'
+SortIncludes: 'true'
 SpaceBeforeAssignmentOperators: 'true'
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: 'false'

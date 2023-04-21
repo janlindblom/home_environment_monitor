@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "vsciot-vscode.vscode-arduino",
+        "ronaldosena.arduino-snippets"
+    ],
+    "unwantedRecommendations": [
+      "ms-vscode.cmake-tools"
+    ]
+}
