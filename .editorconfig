@@ -9,4 +9,19 @@ indent_size = 2
 end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
+insert_final_newline = false
+
+[*.cpp]
 insert_final_newline = true
+
+[*.h]
+insert_final_newline = true
+
+[*.md]
+insert_final_newline = true
+
+[LICENSE]
+insert_final_newline = true
+
+[*.ini]
+indent_style = tab

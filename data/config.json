@@ -1,0 +1,38 @@
+{
+  "networks": {
+    "primary": {
+      "ssid": "",
+      "password": ""
+    },
+    "secondary": {
+      "ssid": "",
+      "password": ""
+    }
+  },
+  "timezone": "Europe/Mariehamn",
+  "location": {
+    "latitude": 60.09639,
+    "longitude": 19.935278,
+    "tz_offset": 3.0,
+    "elevation": 11
+  },
+  "ruuvi": {
+    "devices": [
+      {
+        "name": "Sovrum",
+        "placement": "indoor",
+        "address": "DB:88:B6:70:9E:EB"
+      },
+      {
+        "name": "Vardagsrum",
+        "placement": "indoor",
+        "address": "C9:60:BD:F2:B4:9D"
+      },
+      {
+        "name": "Ute",
+        "placement": "outdoor",
+        "address": "E0:97:3A:23:98:6A"
+      }
+    ]
+  }
+}

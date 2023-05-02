@@ -95,8 +95,8 @@ GRAPHICS
 *.tiff binary
 *.wbmp binary
 *.webp binary
+*.xbm  text eol=lf
 
 # hex files
 *.hex binary
 *.eep binary
-nix/sources.nix linguist-generated=true
