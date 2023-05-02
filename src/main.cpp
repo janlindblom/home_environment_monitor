@@ -32,14 +32,13 @@
 
 #define RUUVI_DEVICES 3
 
-BD_ADDR      ruuvi_devices[RUUVI_DEVICES];
-bool         ruuvi_outdoor_sensor[RUUVI_DEVICES] = {false, true, false};
-ruuvi_data_t ruuvi_readings[RUUVI_DEVICES];
-time_t       ruuvi_reading_time[RUUVI_DEVICES] = {0, 0, 0};
+BD_ADDR*      ruuvi_devices;
+bool*         ruuvi_outdoor_sensor;
+ruuvi_data_t* ruuvi_readings;
+time_t*       ruuvi_reading_time;
 
 uint32_t display_timer = 0;
 
-// U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);
 U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R1);
 
 Config config;
@@ -78,20 +77,25 @@ void setup() {
   config = get_config();
 
   if (configuration_loaded()) {
+    delete[] ruuvi_devices;
+    delete[] ruuvi_outdoor_sensor;
+    delete[] ruuvi_readings;
+    delete[] ruuvi_reading_time;
+    ruuvi_devices        = new BD_ADDR[config.ruuvi.count];
+    ruuvi_outdoor_sensor = new bool[config.ruuvi.count];
+    ruuvi_readings       = new ruuvi_data_t[config.ruuvi.count];
+    ruuvi_reading_time   = new time_t[config.ruuvi.count];
+
     for (uint8_t i = 0; i < config.ruuvi.count; i++) {
+      ruuvi_data_t ruuvi_entry;
       ruuvi_devices[i] = BD_ADDR(config.ruuvi.devices[i].addr);
-      CONDITIONAL_SERIAL_PRINT("Ruuvi device: ");
-      CONDITIONAL_SERIAL_PRINTLN(config.ruuvi.devices[i].name);
-      CONDITIONAL_SERIAL_PRINT("Ruuvi placement: ");
-      CONDITIONAL_SERIAL_PRINTLN(config.ruuvi.devices[i].placement);
       ruuvi_outdoor_sensor[i] =
-          (strcmp("outdoor", config.ruuvi.devices[i].placement) == 0);
-      ruuvi_data_t e;
-      ruuvi_readings[i] = e;
+          (!strcmp("outdoor", config.ruuvi.devices[i].placement));
+      ruuvi_readings[i]     = ruuvi_entry;
+      ruuvi_reading_time[i] = 0;
     }
   }
 
-  CONDITIONAL_SERIAL_PRINTLN("Initialising display...");
   u8g2.setI2CAddress(I2C_ADDRESS << 1);
   u8g2.begin();
   u8g2.enableUTF8Print();
@@ -108,8 +112,6 @@ void setup() {
 
   u8g2.clearBuffer();
   u8g2.sendBuffer();
-
-  CONDITIONAL_SERIAL_PRINTLN("Display initialised.");
 
   CONDITIONAL_SERIAL_PRINTLN("Connecting to WiFi...");
   connect_network();
@@ -134,8 +136,7 @@ void loop() {
     print_bluetooth_status(u8g2);
     print_climate(u8g2, ruuvi_readings, ruuvi_outdoor_sensor,
                   config.ruuvi.count);
-    process_pressure(ruuvi_readings, ruuvi_outdoor_sensor, config.ruuvi.count,
-                     config);
+    process_pressure(ruuvi_readings, ruuvi_outdoor_sensor, config);
   }
   u8g2.sendBuffer();
   control_backlight(u8g2);
@@ -178,7 +179,6 @@ void advertisementCallback(BLEAdvertisement* adv) {
         uint8_t data[LE_ADVERTISING_DATA_SIZE];
         memcpy(data, adv->getAdvData(), LE_ADVERTISING_DATA_SIZE);
         if (data[0] != 0x11) {
-          // ble_stop_scanning();
           time_t       now   = time(nullptr);
           ruuvi_data_t rdata = make_ruuvi_data(data);
           ruuvi_readings[i]  = rdata;
@@ -198,18 +198,13 @@ void advertisementCallback(BLEAdvertisement* adv) {
             CONDITIONAL_SERIAL_PRINTLN(
                 current_trend(pressure_trend()).indication);
             if (average_pressure() > 0) {
-              zambretti_forecast f =
-                  get_forecast(pressure_to_slp(pa_to_mb(average_pressure()),
-                                               config.location.elevation,
-                                               average_temperature()),
-                               current_trend(pressure_trend()).baro_trend);
+              zambretti_forecast f = get_forecast(config);
               CONDITIONAL_SERIAL_PRINT("Forecast: ");
               CONDITIONAL_SERIAL_PRINT(f.forecast);
               CONDITIONAL_SERIAL_PRINT(": ");
               CONDITIONAL_SERIAL_PRINTLN(f.description);
             }
           }
-          // ble_start_scanning();
         }
         // BTstack.bleConnect(adv, 10000);
       }

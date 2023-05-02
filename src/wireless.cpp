@@ -42,8 +42,8 @@ WiFiMulti multi;
  * Controls the wireless hardware state according to the current state of the
  * system.
  *
- * @param configuration
- * @param callback
+ * \param configuration the parsed config file
+ * \param callback the function called when Bluetooth discovers something
  */
 void control_wireless(Config configuration,
                       void (*callback)(BLEAdvertisement* bleAdvertisement)) {
@@ -65,6 +65,9 @@ void control_wireless(Config configuration,
 
 //// WiFi section
 
+/**
+ * Connects to WiFi.
+ */
 void connect_network() {
   if (_network_setup_running || WiFi.connected()) {
     return;
@@ -92,6 +95,9 @@ void connect_network() {
   _network_setup_running = false;
 }
 
+/**
+ * Disconnects from WiFi.
+ */
 void disconnect_network() {
   if (!_network_setup_running && _network_connected) {
     if (WiFi.disconnect() == WL_DISCONNECTED) {
@@ -100,6 +106,11 @@ void disconnect_network() {
   }
 }
 
+/**
+ * Rate the current WiFi signal from UNUSABLE to AMAZING.
+ *
+ * \param rssi the RSSI value for the connection
+ */
 uint8_t wifi_signal_rating(int rssi) {
   if (rssi >= -30) {
     return WiFiSignal::AMAZING;
@@ -113,6 +124,11 @@ uint8_t wifi_signal_rating(int rssi) {
   return WiFiSignal::UNUSABLE;
 }
 
+/**
+ * Show the current WiFi status on the OLED.
+ *
+ * \param u8g2 the OLED display
+ */
 void print_wifi_status(U8G2 u8g2) {
   if (_network_connected) {
     u8g2.setFont(u8g2_font_siji_t_6x10);
@@ -152,6 +168,11 @@ bool network_setup_running() {
 
 //// Bluetooth section
 
+/**
+ * Configure the Bluetooth connection.
+ *
+ * \param callback the callback function for BLE advertisements
+ */
 void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
   if (_bluetooth_configuring || _bluetooth_configured) {
     return;
@@ -166,6 +187,11 @@ void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
   CONDITIONAL_SERIAL_PRINTLN("Bluetooth configured.");
 }
 
+/**
+ * Show Bluetooth status on the OLED.
+ *
+ * \param u8g2 the OLED display
+ */
 void print_bluetooth_status(U8G2 u8g2) {
   if (_bluetooth_scanning && !_network_connected) {
     u8g2.setFont(u8g2_font_siji_t_6x10);
@@ -174,6 +200,9 @@ void print_bluetooth_status(U8G2 u8g2) {
   }
 }
 
+/**
+ * Control the Bluetooth scanning state.
+ */
 void control_bluetooth_scanning() {
   if (!_network_connected && _bluetooth_configured) {
     // Scan for 10 seconds then sleep for 10 seconds
@@ -187,12 +216,18 @@ void control_bluetooth_scanning() {
   }
 }
 
+/**
+ * Start scanning for BLE devices.
+ */
 void ble_start_scanning() {
   comms_timer         = millis();
   _bluetooth_scanning = true;
   BTstack.bleStartScanning();
 }
 
+/**
+ * Stop scanning for BLE devices.
+ */
 void ble_stop_scanning() {
   comms_timer         = millis();
   _bluetooth_scanning = false;
@@ -205,14 +240,6 @@ bool bluetooth_configured() {
 
 bool bluetooth_configuring() {
   return _bluetooth_configuring;
-}
-
-void set_bluetooth_configured(bool val) {
-  _bluetooth_configured = val;
-}
-
-void set_bluetooth_configuring(bool val) {
-  _bluetooth_configuring = val;
 }
 
 bool bluetooth_scanning() {

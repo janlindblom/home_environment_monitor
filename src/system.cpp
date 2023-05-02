@@ -5,23 +5,19 @@
 
 #include "system.h"
 
-#include <Arduino.h>
+#include <Common.h>
 #include <U8g2lib.h>
+#include <inttypes.h>
 
 #include "common.h"
 
-pin_size_t pin_pir     = PIN_PIR;
-pin_size_t pin_ldr_pwr = PIN_LDRPWR;
-pin_size_t pin_ldr     = PIN_LDR;
-
-uint8_t  _ambient_light  = 255;
-uint16_t adc_min         = 0;
-uint16_t adc_max         = 1023;
-uint32_t light_timer     = 0;
-uint32_t powersave_timer = 0;
-bool     backlight_on    = true;
-
-PinStatus _pir_state = PinStatus::LOW;
+uint8_t   _ambient_light  = 255;
+uint16_t  adc_min         = 0; // Set this one to something else if you want.
+uint16_t  adc_max         = 1023;
+uint32_t  light_timer     = 0;
+uint32_t  powersave_timer = 0;
+bool      backlight_on    = true;
+PinStatus _pir_state      = PinStatus::LOW;
 
 /**
  * Reads a LDR connected between pins D22 and A0. Stores the reading as an
@@ -54,7 +50,7 @@ void check_ambient_light() {
  * Controls the backlight level of the OLED screen. Reads the current ambient
  * light level and sets the display backlight accordingly.
  *
- * @param u8g2 the U8G2 display object.
+ * \param u8g2 the U8G2 display object.
  */
 void control_backlight(U8G2 u8g2) {
   if (backlight_on) {
@@ -70,14 +66,15 @@ void control_backlight(U8G2 u8g2) {
   u8g2.setContrast(_ambient_light);
 }
 
+/**
+ * Configure the backlight control part.
+ */
 void setup_backlight() {
 #if defined(ARDUINO_ARCH_RP2040)
   analogReadResolution(12);
   adc_max = 4095; // We get a bigger range on the rp2040
-  adc_min = 700;  // About what I find for mine
   pinMode(D22, PinMode::OUTPUT_12MA);
 #else
-  adc_min = 190; // About what I find for mine
   pinMode(D22, PinMode::OUTPUT);
 #endif
 
@@ -85,14 +82,14 @@ void setup_backlight() {
 }
 
 void pir_triggered() {
-  _pir_state = digitalRead(pin_ldr);
+  _pir_state = digitalRead(D21);
   if (_pir_state == PinStatus::HIGH || _pir_state == PinStatus::RISING) {
-    //backlight_on = true;
+    // backlight_on = true;
     if (millis() - powersave_timer >= 1000) {
       powersave_timer = millis();
     }
   } else if (_pir_state == PinStatus::LOW || _pir_state == PinStatus::FALLING) {
-    //backlight_on = false;
+    // backlight_on = false;
   }
 }
 

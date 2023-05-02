@@ -4,21 +4,9 @@
 // https://opensource.org/licenses/MIT
 
 #include <Arduino.h>
-
-// Local timezone
-#define TIMEZONE "Europe/Mariehamn"
+#include <stdarg.h>
 
 #define FORCE_INLINE __attribute__((always_inline))
-
-#define PIN_LDR A0
-#define PIN_PIR D21
-#define PIN_LDRPWR D22
-
-// Coordinates for sunrise/sunset
-#define LATITUDE 60.09726
-#define LONGITUDE 19.93481
-#define DST_OFFSET 3
-#define ELEVATION 11
 
 // Display parameters
 #define I2C_ADDRESS 0x3c

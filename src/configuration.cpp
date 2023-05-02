@@ -16,8 +16,6 @@ bool   _configured           = false;
 bool   _configuration_loaded = false;
 Config _config;
 
-StaticJsonDocument<2048> doc;
-
 void parseBytes(const char* str, char sep, byte* bytes, int maxBytes,
                 int base) {
   for (int i = 0; i < maxBytes; i++) {
@@ -35,6 +33,7 @@ Config get_config() {
 }
 
 void load_configuration() {
+  StaticJsonDocument<2048> doc;
   noInterrupts();
   File config_file = LittleFS.open(json_config, "r");
 
@@ -56,12 +55,12 @@ void load_configuration() {
     const char* network_value_ssid     = network.value()["ssid"] | "";
     const char* network_value_password = network.value()["password"] | "";
 
-    if (strcmp(network_key, "primary") == 0) {
+    if (!strcmp(network_key, "primary")) {
       strncpy(_config.networks.primary.ssid, network_value_ssid,
               sizeof(_config.networks.primary.ssid));
       strncpy(_config.networks.primary.password, network_value_password,
               sizeof(_config.networks.primary.password));
-    } else if (strcmp(network_key, "secondary") == 0) {
+    } else if (!strcmp(network_key, "secondary")) {
       strncpy(_config.networks.secondary.ssid, network_value_ssid,
               sizeof(_config.networks.secondary.ssid));
       strncpy(_config.networks.secondary.password, network_value_password,
@@ -88,9 +87,7 @@ void load_configuration() {
     uint8_t addr[6];
     parseBytes(ruuvi_device["address"], ':', addr, 6, 16);
     memcpy(device.addr, addr, sizeof(device.addr));
-
     _config.ruuvi.devices[device_number] = device;
-
     device_number++;
   }
   _config.ruuvi.count = device_number;

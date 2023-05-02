@@ -18,7 +18,8 @@
 
 enum WiFiSignal { AMAZING, GREAT, GOOD, OK, BAD, UNUSABLE };
 
-void control_wireless(Config configuration, void (*callback)(BLEAdvertisement* bleAdvertisement));
+void control_wireless(Config configuration,
+                      void (*callback)(BLEAdvertisement* bleAdvertisement));
 
 void    connect_network();
 void    disconnect_network();
@@ -33,8 +34,6 @@ void    print_wifi_status(U8G2 u8g2);
 void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement));
 bool bluetooth_configured();
 bool bluetooth_configuring();
-void set_bluetooth_configured(bool val);
-void set_bluetooth_configuring(bool val);
 bool bluetooth_scanning();
 void ble_start_scanning();
 void ble_stop_scanning();

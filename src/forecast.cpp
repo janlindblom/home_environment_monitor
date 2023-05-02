@@ -7,27 +7,23 @@
 
 #include <Arduino.h>
 
+#include "climate.h"
 #include "common.h"
 #include "forecast_types.h"
 
-const int8_t falling_index = -1;
-const int8_t rising_index  = 1;
+const pressure_change_t change_slp[9] = {{6.0f, "Rising Very Rapidly", 4},
+                                         {3.6f, "Rising Quickly", 3},
+                                         {1.6f, "Rising", 2},
+                                         {0.1f, "Rising Slowly", 1},
+                                         {-0.1f, "Steady", 0},
+                                         {-1.6f, "Falling Slowly", -1},
+                                         {-3.6f, "Falling", -2},
+                                         {-6.0f, "Falling Quickly", -3},
+                                         {-6.0f, "Falling Very Rapidly", -4}};
 
-const pressure_change change_slp[9] = {
-    {6.0f, "Rising Very Rapidly", 4, true},
-    {3.6f, "Rising Quickly", 3, true},
-    {1.6f, "Rising", 2, true},
-    {0.1f, "Rising Slowly", 1, true},
-    {-0.1f, "Steady", 0, true},
-    {-1.6f, "Falling Slowly", -1, true},
-    {-3.6f, "Falling", -2, true},
-    {-6.0f, "Falling Quickly", -3, true},
-    {-6.0f, "Falling Very Rapidly", -4, false}};
-
-const char* forecast_strings[4] = {"Settled Fine", "Fine Weather",
-                                   "Very Unsettled, Rain", "Stormy, much rain"};
-
-const zambretti_forecast forecast[] = {
+char* forecast_strings[4]             = {"Settled Fine", "Fine Weather",
+                                         "Very Unsettled, Rain", "Stormy, much rain"};
+const zambretti_forecast_t forecast[] = {
     {'A', forecast_strings[0]},
     {'B', forecast_strings[1]},
     {'D', "Fine Becoming Less Settled"},
@@ -87,45 +83,29 @@ float pressure_to_slp(float pressure, int16_t elevation, float temperature) {
 }
 
 /**
- * Get the Zambretti text indication for the current barometric trend.
- *
- * \param baro_trend the current Zambretti barometric trend
- * \return a string describing the current trend
- */
-char* indication(int8_t baro_trend) {
-  for (uint8_t i = 0; i < 9; i++) {
-    if (baro_trend == change_slp[i].baro_trend) {
-      return change_slp[i].indication;
-    }
-  }
-
-  return change_slp[4].indication;
-}
-
-/**
  * Get the current Zambretti barometric trend from the current trend of change
  * in pressure.
  *
  * \param change the current pressure change trend in mBar/time
  */
-pressure_change current_trend(float change) {
-  if (change > 6.0f) {
+pressure_change_t current_trend(float change) {
+  if (change > change_slp[0].threshold) {
     return change_slp[0];
-  } else if (change > 3.6f) {
+  } else if (change > change_slp[1].threshold) {
     return change_slp[1];
-  } else if (change > 1.6f) {
+  } else if (change > change_slp[2].threshold) {
     return change_slp[2];
-  } else if (change > 0.1f) {
+  } else if (change > change_slp[3].threshold) {
     return change_slp[3];
-  } else if (change > -0.1f) {
+  } else if (change > change_slp[4].threshold) {
     return change_slp[4];
-  } else if (change > -1.6f) {
+  } else if (change > change_slp[5].threshold) {
     return change_slp[5];
-  } else if (change > -3.6f) {
+  } else if (change > change_slp[6].threshold) {
     return change_slp[6];
-  } else if (change > -6.0f) {
+  } else if (change > change_slp[7].threshold) {
     return change_slp[7];
-  } else if (change <= -6.0f) {
+  } else if (change <= change_slp[8].threshold) {
     return change_slp[8];
   }
 
@@ -133,27 +113,57 @@ pressure_change current_trend(float change) {
   return change_slp[4];
 }
 
-zambretti_forecast get_forecast(float pressure, int8_t baro_trend) {
-  int z          = 1;
-  int pressure_i = int(pressure);
-  CONDITIONAL_SERIAL_PRINT("Baro trend: ");
-  CONDITIONAL_SERIAL_PRINTLN(baro_trend);
-  CONDITIONAL_SERIAL_PRINT("Pressure: ");
-  CONDITIONAL_SERIAL_PRINT(pressure);
-  CONDITIONAL_SERIAL_PRINT(", ");
-  CONDITIONAL_SERIAL_PRINTLN(pressure_i);
-
-  if (baro_trend > 0) {
-    // For a rising barometer Z = 179-2P/129
-    z = int(179 - pressure * 0.16f);
-
-  } else if (baro_trend < 0) {
-    // For a falling barometer Z = 130-P/81
-    z = int(130 - pressure * 0.12f);
-  } else {
-    // For a steady barometer Z = 147-5P/376
-    z = int(147 - pressure * 0.13f);
+/**
+ * Tell if it's currently summer.
+ */
+bool summer() {
+  time_t    now = time(nullptr);
+  struct tm local;
+  localtime_r(&now, &local);
+  // Summer is may through october
+  if (local.tm_mon >= 4 && local.tm_mon <= 9) {
+    return true;
   }
+  return false;
+}
+
+/**
+ * Get a forecast based on the Zambretti algorithm.
+ *
+ * \param configuration the parsed config file
+ */
+zambretti_forecast_t get_forecast(Config configuration) {
+  int z        = 1;
+  int trend    = current_trend(pressure_trend()).baro_trend;
+  int pressure = int(pressure_to_slp(pa_to_mb(average_pressure()),
+                                     configuration.location.elevation,
+                                     average_temperature()));
+
+  CONDITIONAL_SERIAL_PRINT("Baro trend: ");
+  CONDITIONAL_SERIAL_PRINTLN(trend);
+  CONDITIONAL_SERIAL_PRINT("Pressure: ");
+  CONDITIONAL_SERIAL_PRINTLN(pressure);
+
+  if (trend > 0) {
+    // For a rising barometer Z = 179-P*0.16
+    z = int(179 - (20 * pressure) / 129);
+    z -= summer(); // Subtract one if it's summer
+  } else if (trend < 0) {
+    // For a falling barometer Z = 130-P*0.12
+    z = int(130 - (10 * pressure) / 81);
+    z -= !summer(); // Subtract one if it's winter
+  } else {
+    // For a steady barometer Z = 147-P*0.13
+    z = int(147 - (50 * pressure) / 376);
+  }
+
+  // Make sure we're not out of bounds.
+  if (z >= sizeof(forecast) / sizeof(zambretti_forecast_t)) {
+    z -= 1;
+  } else if (z < 0) {
+    z += 1;
+  }
+
   CONDITIONAL_SERIAL_PRINT("Z: ");
   CONDITIONAL_SERIAL_PRINTLN(z);
 

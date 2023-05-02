@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <LittleFS.h>
-
 #include "configuration_types.h"
 
 const char json_config[] = "config.json";
