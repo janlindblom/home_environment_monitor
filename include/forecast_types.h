@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <inttypes.h>
+#include <Arduino.h>
 
 /**
  * Data structure describing a pressure change.

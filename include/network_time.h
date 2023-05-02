@@ -3,8 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <Arduino.h>
 #include <U8g2lib.h>
-#include <inttypes.h>
 #include <sunset.h>
 
 #include "configuration_types.h"

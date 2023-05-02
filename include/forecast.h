@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <inttypes.h>
+#include <Arduino.h>
 
 #include "configuration_types.h"
 #include "forecast_types.h"

@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include <Common.h>
+#include <Arduino.h>
 #include <U8g2lib.h>
 
 void check_ambient_light();

@@ -5,35 +5,35 @@
 
 #pragma once
 
-#include <inttypes.h>
+#include <Arduino.h>
 
 #include "ruuvi_types.h"
 
-typedef union network_section_entry {
+typedef struct network_section_entry {
   char ssid[32];
   char password[63];
 } network_section_entry_t;
 
-typedef union network_section {
+typedef struct network_section {
   network_section_entry_t primary;
   network_section_entry_t secondary;
 } network_section_t;
 
-typedef union location_section {
+typedef struct location_section {
   float longitude;
   float latitude;
   float tz_offset;
   int   elevation;
 } location_t;
 
-typedef union ruuvi_section {
+typedef struct ruuvi_section {
   uint8_t        count;
   ruuvi_device_t devices[10];
 } ruuvi_t;
 
-typedef struct config_structure {
+struct Config {
   network_section_t networks;
   char              timezone[64];
   location_t        location;
   ruuvi_t           ruuvi;
-} Config;
+};

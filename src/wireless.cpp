@@ -100,7 +100,7 @@ void connect_network() {
  */
 void disconnect_network() {
   if (!_network_setup_running && _network_connected) {
-    if (WiFi.disconnect() == WL_DISCONNECTED) {
+    if (WiFi.disconnect(true) == WL_DISCONNECTED) {
       _network_connected = false;
     }
   }

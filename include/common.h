@@ -4,7 +4,6 @@
 // https://opensource.org/licenses/MIT
 
 #include <Arduino.h>
-#include <stdarg.h>
 
 #define FORCE_INLINE __attribute__((always_inline))
 

@@ -3,10 +3,10 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+#include <Arduino.h>
 #include <BTstackLib.h>
 #include <U8g2lib.h>
 #include <WiFi.h>
-#include <inttypes.h>
 
 #include "arduino_secrets.h"
 #include "configuration_types.h"

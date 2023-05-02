@@ -5,18 +5,18 @@
 
 #pragma once
 
-#include <inttypes.h>
+#include <Arduino.h>
 
-typedef union ruuvi_device {
+typedef struct ruuvi_device {
   char    name[16];
   char    placement[8];
   char    address[17];
   uint8_t addr[6];
 } ruuvi_device_t;
 
-typedef union ruuvi_data {
-  uint8_t  format;
-  float    temperature;
-  float    humidity;
-  uint32_t pressure;
+typedef struct ruuvi_data {
+  uint8_t  format      = 5;
+  float    temperature = 0.0;
+  float    humidity    = 0.0;
+  uint32_t pressure    = 0;
 } ruuvi_data_t;

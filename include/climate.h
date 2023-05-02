@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #include <U8g2lib.h>
-#include <inttypes.h>
+#include <Arduino.h>
 
 #include "configuration_types.h"
 #include "ruuvi_types.h"
