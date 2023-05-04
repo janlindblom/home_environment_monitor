@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
+#include "font_segments_12x17.h"
+
 #define FORCE_INLINE __attribute__((always_inline))
 
 // Display parameters

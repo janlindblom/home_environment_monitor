@@ -113,7 +113,8 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
     u8g2.setFont(u8g2_font_unifont_t_weather);
     u8g2.drawGlyph(xoffset, yoffset, 49);
     xoffset += u8g2.getMaxCharWidth();
-    u8g2.setFont(u8g2_font_helvB10_tf);
+    // u8g2.setFont(u8g2_font_helvB10_tf);
+    u8g2.setFont(font_segments_12x17);
     u8g2.drawUTF8(xoffset, yoffset, temperature_string);
 
     xoffset += u8g2.getUTF8Width(temperature_string);
