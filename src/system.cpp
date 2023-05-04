@@ -20,20 +20,20 @@ bool      backlight_on    = true;
 PinStatus _pir_state      = PinStatus::LOW;
 
 /**
- * Reads a LDR connected between pins D22 and A0. Stores the reading as an
- * unsigned 8 bit integer.
+ * Reads a LDR connected between pins PIN_LDR_PWR and PIN_LDR. Stores the
+ * reading as an unsigned 8 bit integer.
  */
 void check_ambient_light() {
   uint16_t total   = 0;
   uint16_t reading = 0;
 
-  // Set D22 high then wait a little bit before reading A0.
-  digitalWrite(D22, PinStatus::HIGH);
+  // Set PIN_LDR_PWR high then wait a little bit before reading PIN_LDR.
+  digitalWrite(PIN_LDR_PWR, PinStatus::HIGH);
   delay(50);
   for (uint8_t i = 0; i < 4; i++) {
-    total += analogRead(A0);
+    total += analogRead(PIN_LDR);
   }
-  digitalWrite(D22, PinStatus::LOW);
+  digitalWrite(PIN_LDR_PWR, PinStatus::LOW);
 
   reading = total >> 2;
 
@@ -73,16 +73,16 @@ void setup_backlight() {
 #if defined(ARDUINO_ARCH_RP2040)
   analogReadResolution(12);
   adc_max = 4095; // We get a bigger range on the rp2040
-  pinMode(D22, PinMode::OUTPUT_12MA);
+  pinMode(PIN_LDR_PWR, PinMode::OUTPUT_12MA);
 #else
-  pinMode(D22, PinMode::OUTPUT);
+  pinMode(PIN_LDR_PWR, PinMode::OUTPUT);
 #endif
 
   light_timer = millis();
 }
 
 void pir_triggered() {
-  _pir_state = digitalRead(D21);
+  _pir_state = digitalRead(PIN_PIR);
   if (_pir_state == PinStatus::HIGH || _pir_state == PinStatus::RISING) {
     // backlight_on = true;
     if (millis() - powersave_timer >= 1000) {
@@ -98,15 +98,16 @@ PinStatus pir_state() {
 }
 
 PinStatus pir_status() {
-  _pir_state = digitalRead(D21);
+  _pir_state = digitalRead(PIN_PIR);
   return _pir_state;
 }
 
 void pir_init() {
-  pinMode(D21, PinMode::INPUT);
-  attachInterrupt(digitalPinToInterrupt(D21), pir_triggered, PinStatus::CHANGE);
+  pinMode(PIN_PIR, PinMode::INPUT);
+  attachInterrupt(digitalPinToInterrupt(PIN_PIR), pir_triggered,
+                  PinStatus::CHANGE);
 }
 
 void pir_deinit() {
-  detachInterrupt(digitalPinToInterrupt(D21));
+  detachInterrupt(digitalPinToInterrupt(PIN_PIR));
 }

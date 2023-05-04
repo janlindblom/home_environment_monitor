@@ -49,12 +49,12 @@ void process_pressure(ruuvi_data_t ruuvi_readings[],
                                                _average_temperature);
       pressure_trend_data[1] = pa_to_mb(_average_pressure);
 
-      CONDITIONAL_SERIAL_PRINT("Oldest pressure data: ");
-      CONDITIONAL_SERIAL_PRINTLN(pressure_trend_data[0]);
-      CONDITIONAL_SERIAL_PRINT("Newest pressure data: ");
-      CONDITIONAL_SERIAL_PRINTLN(pressure_trend_data[1]);
-      CONDITIONAL_SERIAL_PRINT("SLP: ");
-      CONDITIONAL_SERIAL_PRINTLN(slp);
+      Serial.print(F("Oldest pressure data: "));
+      Serial.println(pressure_trend_data[0]);
+      Serial.print(F("Newest pressure data: "));
+      Serial.println(pressure_trend_data[1]);
+      Serial.print(F("SLP: "));
+      Serial.println(slp);
       last_pressure = time(nullptr);
     }
   }
@@ -96,10 +96,11 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
   }
 
   for (uint8_t i = 0; i < 2; i++) {
-    u8g2.setFont(u8g2_font_helvB10_tf);
-    yoffset += u8g2.getMaxCharHeight();
-    char    temperature_string[9];
-    char    humidity_string[7];
+    // u8g2.setFont(u8g2_font_helvB10_tf);
+    u8g2.setFont(font_segments_12x17);
+    yoffset += u8g2.getMaxCharHeight() + 2;
+    char    temperature_string[8];
+    char    humidity_string[6];
     uint8_t xoffset = 0;
     float   average_temperature =
         temperature_readings[i] /
@@ -108,21 +109,27 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
         humidity_readings[i] /
         ((number_of_readings[i] > 0 ? number_of_readings[i] : 1) * 1.0f);
     sprintf(temperature_string, "%2.1f°C", average_temperature);
-    sprintf(humidity_string, "%3.1f%c", average_humidity, '%');
+    sprintf(humidity_string, "%3d%c", int(average_humidity), '%');
 
-    u8g2.setFont(u8g2_font_unifont_t_weather);
-    u8g2.drawGlyph(xoffset, yoffset, 49);
-    xoffset += u8g2.getMaxCharWidth();
-    // u8g2.setFont(u8g2_font_helvB10_tf);
+    // u8g2.setFont(u8g2_font_unifont_t_weather);
+    u8g2.setFont((i == 0 ? u8g2_font_open_iconic_embedded_2x_t
+                         : u8g2_font_open_iconic_thing_2x_t));
+    u8g2.drawGlyph(xoffset, yoffset, (i == 0 ? 68 : 76));
+    // u8g2.drawGlyph(xoffset, yoffset, 49);
+    xoffset += u8g2.getMaxCharWidth() + 2;
+    //  u8g2.setFont(u8g2_font_helvB10_tf);
     u8g2.setFont(font_segments_12x17);
     u8g2.drawUTF8(xoffset, yoffset, temperature_string);
 
-    xoffset += u8g2.getUTF8Width(temperature_string);
-    u8g2.setFont(u8g2_font_unifont_t_weather);
-    u8g2.drawGlyph(xoffset, yoffset, 50);
-    xoffset += u8g2.getMaxCharWidth();
-    u8g2.setFont(u8g2_font_helvR10_tf);
-    u8g2.drawStr(xoffset, yoffset, humidity_string);
-    xoffset += u8g2.getStrWidth(humidity_string);
+    // xoffset += u8g2.getUTF8Width(temperature_string);
+    // u8g2.setFont(u8g2_font_unifont_t_weather);
+    // u8g2.drawGlyph(xoffset, yoffset, 50);
+    // xoffset += u8g2.getMaxCharWidth();
+    //  u8g2.setFont(u8g2_font_helvR10_tf);
+    u8g2.setFont(font_segments_12x17);
+    xoffset = u8g2.getUTF8Width(humidity_string);
+    u8g2.drawUTF8(u8g2.getDisplayWidth() - xoffset - 1, yoffset,
+                  humidity_string);
+    // xoffset += u8g2.getStrWidth(humidity_string);
   }
 }

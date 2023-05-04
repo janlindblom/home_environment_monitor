@@ -17,10 +17,10 @@
 #include "configuration_types.h"
 #include "wireless.h"
 
-const char* weekdays[] = {"Söndag",  "Måndag", "Tisdag", "Onsdag",
-                          "Torsdag", "Fredag", "Lördag"};
-const char* months[]   = {"jan", "feb", "mar", "apr", "maj", "jun",
-                          "jul", "aug", "sep", "okt", "nov", "dec"};
+const char* weekdays[] PROGMEM = {"Söndag",  "Måndag", "Tisdag", "Onsdag",
+                                  "Torsdag", "Fredag", "Lördag"};
+const char* months[] PROGMEM   = {"jan", "feb", "mar", "apr", "maj", "jun",
+                                  "jul", "aug", "sep", "okt", "nov", "dec"};
 
 bool _network_time_set      = false;
 bool _network_time_received = false;
@@ -40,36 +40,34 @@ void configure_network_time(Config configuration) {
   }
 
   if (!NTP.running()) {
-    CONDITIONAL_SERIAL_PRINTLN("Setting up NTP...");
+    Serial.println(F("Setting up NTP..."));
     NTP.begin(NTP_SERVER1, NTP_SERVER2);
   } else {
-    CONDITIONAL_SERIAL_PRINTLN(
-        "NTP configured. Waiting for time from network.");
+    Serial.println(F("NTP configured. Waiting for time from network."));
   }
 
   if (NTP.waitSet()) {
-    CONDITIONAL_SERIAL_PRINTLN("Processing NTP response...");
+    Serial.println(F("Processing NTP response..."));
     _network_time_received = true;
   } else {
-    CONDITIONAL_SERIAL_PRINTLN(
-        "Timeout waiting for network time, will wait for response.");
+    Serial.println(
+        F("Timeout waiting for network time, will wait for response."));
     _network_time_received = false;
   }
 
   time_t now = time(nullptr);
   if (now > 57600) {
-    CONDITIONAL_SERIAL_PRINTLN("NTP time response from network, processing.");
+    Serial.println(F("NTP time response from network, processing."));
     const char* tz = lookup_posix_timezone_tz(configuration.timezone);
     setenv("TZ", tz, 1);
     tzset();
 
-    CONDITIONAL_SERIAL_PRINT("Time set from network: ");
-    CONDITIONAL_SERIAL_PRINT(asctime(localtime(&now)));
+    Serial.print(F("Time set from network: "));
+    Serial.print(asctime(localtime(&now)));
     configure_sunset(configuration);
     _network_time_set = true;
   } else {
-    CONDITIONAL_SERIAL_PRINTLN(
-        "No good time from network yet, will try again.");
+    Serial.println(F("No good time from network yet, will try again."));
     _network_time_set = false;
   }
 }

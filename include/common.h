@@ -14,16 +14,9 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-#define CONDITIONAL_SERIAL_PRINTLN(...) \
-  {                                     \
-    if (Serial) {                       \
-      Serial.println(__VA_ARGS__);      \
-    }                                   \
-  }
-
-#define CONDITIONAL_SERIAL_PRINT(...) \
-  {                                   \
-    if (Serial) {                     \
-      Serial.print(__VA_ARGS__);      \
-    }                                 \
-  }
+// Pin connections
+#ifdef ARDUINO_ARCH_RP2040
+#  define PIN_LDR A0
+#  define PIN_LDR_PWR D22
+#  define PIN_PIR D21
+#endif

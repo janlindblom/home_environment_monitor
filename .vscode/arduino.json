@@ -1,8 +1,0 @@
-{
-    "configuration": "flash=2097152_65536,freq=133,opt=Small,rtti=Disabled,stackprotect=Enabled,exceptions=Enabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk,wificountry=finland,ipbtstack=ipv4btcble,uploadmethod=default",
-    "board": "rp2040:rp2040:rpipicow",
-    "sketch": "HomeEnvironmentMonitor.ino",
-    "output": "build",
-    "port": "COM5",
-    "intelliSenseGen": "enable"
-}

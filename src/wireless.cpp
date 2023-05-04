@@ -48,17 +48,17 @@ WiFiMulti multi;
 void control_wireless(Config configuration,
                       void (*callback)(BLEAdvertisement* bleAdvertisement)) {
   if (!_network_connected && !network_time_set()) {
-    CONDITIONAL_SERIAL_PRINTLN("No network connection, trying to connect.");
+    Serial.println(F("No network connection, trying to connect."));
     connect_network();
   } else if (_network_connected && !network_time_set()) {
     configure_network_time(configuration);
   } else if (network_time_set() && _network_connected) {
-    CONDITIONAL_SERIAL_PRINTLN("No more need for network, disconnecting...");
+    Serial.println(F("No more need for network, disconnecting..."));
     disconnect_network();
   } else if ((!_network_connected && network_time_set()) &&
              !_bluetooth_configured) {
-    CONDITIONAL_SERIAL_PRINTLN(
-        "Time is set and network disconnected, setting up Bluetooth...");
+    Serial.println(
+        F("Time is set and network disconnected, setting up Bluetooth..."));
     configure_bluetooth(callback);
   }
 }
@@ -178,13 +178,13 @@ void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
     return;
   }
 
-  CONDITIONAL_SERIAL_PRINTLN("Configuring Bluetooth...");
+  Serial.println(F("Configuring Bluetooth..."));
   _bluetooth_configuring = true;
   BTstack.setBLEAdvertisementCallback(callback);
   BTstack.setup();
   _bluetooth_configured  = true;
   _bluetooth_configuring = false;
-  CONDITIONAL_SERIAL_PRINTLN("Bluetooth configured.");
+  Serial.println(F("Bluetooth configured."));
 }
 
 /**

@@ -11,19 +11,21 @@
 #include "common.h"
 #include "forecast_types.h"
 
-const pressure_change_t change_slp[9] = {{6.0f, "Rising Very Rapidly", 4},
-                                         {3.6f, "Rising Quickly", 3},
-                                         {1.6f, "Rising", 2},
-                                         {0.1f, "Rising Slowly", 1},
-                                         {-0.1f, "Steady", 0},
-                                         {-1.6f, "Falling Slowly", -1},
-                                         {-3.6f, "Falling", -2},
-                                         {-6.0f, "Falling Quickly", -3},
-                                         {-6.0f, "Falling Very Rapidly", -4}};
+const pressure_change_t change_slp[9] PROGMEM = {
+    {6.0f, "Rising Very Rapidly", 4},
+    {3.6f, "Rising Quickly", 3},
+    {1.6f, "Rising", 2},
+    {0.1f, "Rising Slowly", 1},
+    {-0.1f, "Steady", 0},
+    {-1.6f, "Falling Slowly", -1},
+    {-3.6f, "Falling", -2},
+    {-6.0f, "Falling Quickly", -3},
+    {-6.0f, "Falling Very Rapidly", -4}};
 
-char* forecast_strings[4]             = {"Settled Fine", "Fine Weather",
-                                         "Very Unsettled, Rain", "Stormy, much rain"};
-const zambretti_forecast_t forecast[] = {
+char* forecast_strings[4] PROGMEM             = {"Settled Fine", "Fine Weather",
+                                                 "Very Unsettled, Rain",
+                                                 "Stormy, much rain"};
+const zambretti_forecast_t forecast[] PROGMEM = {
     {'A', forecast_strings[0]},
     {'B', forecast_strings[1]},
     {'D', "Fine Becoming Less Settled"},
@@ -139,10 +141,10 @@ zambretti_forecast_t get_forecast(Config configuration) {
                                      configuration.location.elevation,
                                      average_temperature()));
 
-  CONDITIONAL_SERIAL_PRINT("Baro trend: ");
-  CONDITIONAL_SERIAL_PRINTLN(trend);
-  CONDITIONAL_SERIAL_PRINT("Pressure: ");
-  CONDITIONAL_SERIAL_PRINTLN(pressure);
+  Serial.print(F("Baro trend: "));
+  Serial.println(trend);
+  Serial.print(F("Pressure: "));
+  Serial.println(pressure);
 
   if (trend > 0) {
     // For a rising barometer Z = 179-P*0.16
@@ -164,8 +166,8 @@ zambretti_forecast_t get_forecast(Config configuration) {
     z += 1;
   }
 
-  CONDITIONAL_SERIAL_PRINT("Z: ");
-  CONDITIONAL_SERIAL_PRINTLN(z);
+  Serial.print(F("Z: "));
+  Serial.println(z);
 
   // Since calculated Z will be >= 1, subtract 1 to use it as array index.
   return forecast[z - 1];

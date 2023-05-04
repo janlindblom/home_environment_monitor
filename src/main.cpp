@@ -40,6 +40,7 @@ time_t*       ruuvi_reading_time;
 uint32_t display_timer = 0;
 
 U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R1);
+// U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R0);
 
 Config config;
 
@@ -71,9 +72,9 @@ void setup() {
     Serial.begin(115200);
   }
 
-  CONDITIONAL_SERIAL_PRINTLN("Reading configuration...");
+  Serial.println(F("Reading configuration..."));
   load_configuration();
-  CONDITIONAL_SERIAL_PRINTLN("Configuration loaded.");
+  Serial.println(F("Configuration loaded."));
   config = get_config();
 
   if (configuration_loaded()) {
@@ -113,9 +114,9 @@ void setup() {
   u8g2.clearBuffer();
   u8g2.sendBuffer();
 
-  CONDITIONAL_SERIAL_PRINTLN("Connecting to WiFi...");
+  Serial.println(F("Connecting to WiFi..."));
   connect_network();
-  CONDITIONAL_SERIAL_PRINTLN("WiFi connection configured.");
+  Serial.println(F("WiFi connection configured."));
   pir_init();
 }
 
@@ -184,25 +185,23 @@ void advertisementCallback(BLEAdvertisement* adv) {
           ruuvi_readings[i]  = rdata;
           if ((ruuvi_reading_time[i] == 0) ||
               difftime(now, ruuvi_reading_time[i]) >= 360.0f) {
-            CONDITIONAL_SERIAL_PRINTLN(
-                "Six minutes since last logged reading, saving...")
+            Serial.println(
+                F("Six minutes since last logged reading, saving..."));
             ruuvi_reading_time[i] = now;
-            CONDITIONAL_SERIAL_PRINT("Logging Ruuvi device: ");
-            CONDITIONAL_SERIAL_PRINTLN(config.ruuvi.devices[i].name);
-            CONDITIONAL_SERIAL_PRINT("Current pressure trend: ");
-            CONDITIONAL_SERIAL_PRINTLN(pressure_trend());
-            CONDITIONAL_SERIAL_PRINT("Zambretti trend: ");
-            CONDITIONAL_SERIAL_PRINTLN(
-                current_trend(pressure_trend()).baro_trend);
-            CONDITIONAL_SERIAL_PRINT("Zambretti indication: ");
-            CONDITIONAL_SERIAL_PRINTLN(
-                current_trend(pressure_trend()).indication);
+            Serial.print(F("Logging Ruuvi device: "));
+            Serial.println(config.ruuvi.devices[i].name);
+            Serial.print(F("Current pressure trend: "));
+            Serial.println(pressure_trend());
+            Serial.print(F("Zambretti trend: "));
+            Serial.println(current_trend(pressure_trend()).baro_trend);
+            Serial.print(F("Zambretti indication: "));
+            Serial.println(current_trend(pressure_trend()).indication);
             if (average_pressure() > 0) {
               zambretti_forecast f = get_forecast(config);
-              CONDITIONAL_SERIAL_PRINT("Forecast: ");
-              CONDITIONAL_SERIAL_PRINT(f.forecast);
-              CONDITIONAL_SERIAL_PRINT(": ");
-              CONDITIONAL_SERIAL_PRINTLN(f.description);
+              Serial.print(F("Forecast: "));
+              Serial.print(f.forecast);
+              Serial.print(F(": "));
+              Serial.println(f.description);
             }
           }
         }

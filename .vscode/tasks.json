@@ -4,9 +4,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Arduino CLI Compile",
-            "type": "shell",
-            "command": "arduino-cli compile -m pico -e"
+            "type": "PlatformIO",
+            "task": "Build",
+            "problemMatcher": [
+                "$platformio"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "label": "PlatformIO: Build"
         }
     ]
 }
