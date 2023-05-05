@@ -6,10 +6,13 @@
 #include "forecast.h"
 
 #include <Arduino.h>
+#include <U8g2lib.h>
+#include <inttypes.h>
 
 #include "climate.h"
 #include "common.h"
 #include "forecast_types.h"
+#include "network_time.h"
 
 const pressure_change_t change_slp[9] PROGMEM = {
     {6.0f, "Rising Very Rapidly", 4},
@@ -22,10 +25,11 @@ const pressure_change_t change_slp[9] PROGMEM = {
     {-6.0f, "Falling Quickly", -3},
     {-6.0f, "Falling Very Rapidly", -4}};
 
-char* forecast_strings[4] PROGMEM             = {"Settled Fine", "Fine Weather",
-                                                 "Very Unsettled, Rain",
-                                                 "Stormy, much rain"};
-const zambretti_forecast_t forecast[] PROGMEM = {
+char* forecast_strings[4] PROGMEM = {"Settled Fine", "Fine Weather",
+                                     "Very Unsettled, Rain",
+                                     "Stormy, much rain"};
+
+const zambretti_forecast_t forecast[32] PROGMEM = {
     {'A', forecast_strings[0]},
     {'B', forecast_strings[1]},
     {'D', "Fine Becoming Less Settled"},
@@ -35,6 +39,7 @@ const zambretti_forecast_t forecast[] PROGMEM = {
     {'U', "Rain at times, worse later"},
     {'V', "Rain at times, becoming very unsettled"},
     {'X', forecast_strings[2]},
+
     {'A', forecast_strings[0]},
     {'B', forecast_strings[1]},
     {'E', "Fine, Possibly showers"},
@@ -45,6 +50,7 @@ const zambretti_forecast_t forecast[] PROGMEM = {
     {'W', "Rain at Frequent Intervals"},
     {'X', forecast_strings[2]},
     {'Z', forecast_strings[3]},
+
     {'A', forecast_strings[0]},
     {'B', forecast_strings[1]},
     {'C', "Becoming Fine"},
@@ -58,6 +64,20 @@ const zambretti_forecast_t forecast[] PROGMEM = {
     {'T', "Very Unsettled, Finer at times"},
     {'Y', "Stormy, possibly improving"},
     {'Z', forecast_strings[3]}};
+
+enum icon_name {
+  CLOUDY = 0,
+  STORMY,
+  STORMY_RAINY,
+  RAINY_SNOWY,
+  RAINY,
+  SHOWERY,
+  OVERCAST_SUN,
+  OVERCAST_MOON,
+  CLEAR_MOON,
+  CLEAR_SUN,
+  WINDY
+};
 
 /**
  * Translate pressure in Pascals to pressure in mBar.
@@ -141,11 +161,6 @@ zambretti_forecast_t get_forecast(Config configuration) {
                                      configuration.location.elevation,
                                      average_temperature()));
 
-  Serial.print(F("Baro trend: "));
-  Serial.println(trend);
-  Serial.print(F("Pressure: "));
-  Serial.println(pressure);
-
   if (trend > 0) {
     // For a rising barometer Z = 179-P*0.16
     z = int(179 - (20 * pressure) / 129);
@@ -166,9 +181,74 @@ zambretti_forecast_t get_forecast(Config configuration) {
     z += 1;
   }
 
-  Serial.print(F("Z: "));
-  Serial.println(z);
-
   // Since calculated Z will be >= 1, subtract 1 to use it as array index.
   return forecast[z - 1];
+}
+
+void print_forecast_icon(U8G2 u8g2, Config configuration) {
+  zambretti_forecast_t forecast = get_forecast(configuration);
+  time_t               now      = time(nullptr);
+  struct tm            local, gmt;
+  localtime_r(&now, &local);
+  gmtime_r(&now, &gmt);
+  sun().setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
+  int  sunrise = static_cast<int>(sun().calcSunrise());
+  int  sunset  = static_cast<int>(sun().calcSunset());
+  bool day =
+      ((local.tm_hour >= (sunrise / 60)) && (local.tm_min >= (sunrise % 60)) &&
+       (local.tm_hour < (sunset / 60)) && (local.tm_min < (sunset % 60)));
+
+  u8g2.setFont(u8g2_font_waffle_t_all);
+  u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,
+                 u8g2.getDisplayHeight() - 1,
+                 forecast_icon(forecast.forecast, day));
+}
+
+uint16_t forecast_icon(char forecast, bool day = true) {
+  uint16_t icon_offset = 57899;
+  uint16_t icon        = 63;
+  switch (forecast) {
+    case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+      icon = icon_offset + (day ? CLEAR_SUN : CLEAR_MOON);
+      break;
+    case 'E':
+    case 'F':
+    case 'J':
+      icon = icon_offset + (day ? OVERCAST_SUN : OVERCAST_MOON);
+      break;
+    case 'G':
+    case 'H':
+    case 'L':
+    case 'M':
+    case 'Q':
+      icon = icon_offset + CLOUDY;
+      break;
+    case 'I':
+    case 'K':
+    case 'N':
+    case 'O':
+    case 'P':
+    case 'R':
+    case 'S':
+      icon = icon_offset + SHOWERY;
+      break;
+    case 'T':
+    case 'U':
+    case 'W':
+      icon = icon_offset + RAINY;
+      break;
+    case 'V':
+    case 'X':
+      icon = icon_offset + STORMY_RAINY;
+      break;
+    case 'Y':
+    case 'Z':
+      icon = icon_offset + STORMY;
+      break;
+  }
+
+  return icon;
 }

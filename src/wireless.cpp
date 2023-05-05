@@ -16,7 +16,6 @@
 #include "network_time.h"
 
 const uint16_t signal_strength[] = {57890, 57889, 57888, 57888, 57887};
-const uint8_t  network[]         = {68, 64};
 
 bool _wifi_ap_configured    = false;
 bool _network_connected     = false;
@@ -133,16 +132,16 @@ void print_wifi_status(U8G2 u8g2) {
   if (_network_connected) {
     u8g2.setFont(u8g2_font_siji_t_6x10);
     uint16_t signal_icon = signal_strength[wifi_signal_rating(WiFi.RSSI())];
-    u8g2.drawGlyph(u8g2.getDisplayWidth() - 1 - u8g2.getMaxCharWidth(),
-                   u8g2.getDisplayHeight(), signal_icon);
+    u8g2.drawGlyph(u8g2.getDisplayWidth() - u8g2.getMaxCharWidth() - 1,
+                   u8g2.getDisplayHeight() - 1, signal_icon);
   }
   uint8_t icon_width = u8g2.getMaxCharWidth();
   if (!_bluetooth_configured && !_bluetooth_scanning &&
       !_bluetooth_configuring) {
     u8g2.setFont(u8g2_font_open_iconic_www_1x_t);
     u8g2.drawGlyph(
-        u8g2.getDisplayWidth() - 1 - u8g2.getMaxCharWidth() - icon_width,
-        u8g2.getDisplayHeight(), 72);
+        u8g2.getDisplayWidth() - u8g2.getMaxCharWidth() - icon_width - 1,
+        u8g2.getDisplayHeight() - 1, 72);
   }
 }
 
@@ -156,10 +155,6 @@ bool network_connected() {
 
 bool network_disconnected() {
   return !network_connected();
-}
-
-void set_network_disconnected() {
-  _network_connected = false;
 }
 
 bool network_setup_running() {
@@ -195,7 +190,7 @@ void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
 void print_bluetooth_status(U8G2 u8g2) {
   if (_bluetooth_scanning && !_network_connected) {
     u8g2.setFont(u8g2_font_siji_t_6x10);
-    u8g2.drawGlyph(u8g2.getDisplayWidth() - 1 - u8g2.getMaxCharWidth(),
+    u8g2.drawGlyph(u8g2.getDisplayWidth() - u8g2.getMaxCharWidth() - 1,
                    u8g2.getDisplayHeight() - 1, 57355);
   }
 }

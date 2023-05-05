@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #include <Arduino.h>
+#include <U8g2lib.h>
 
 #include "configuration_types.h"
 #include "forecast_types.h"
@@ -13,3 +14,5 @@ float pressure_to_slp(float pressure, int16_t elevation, float temperature);
 
 pressure_change_t    current_trend(float change);
 zambretti_forecast_t get_forecast(Config configuration);
+uint16_t             forecast_icon(char forecast, bool day);
+void                 print_forecast_icon(U8G2 u8g2, Config configuration);

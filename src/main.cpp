@@ -133,6 +133,7 @@ void loop() {
       process_pressure(ruuvi_readings(), ruuvi_outdoor_sensor(), config);
       print_climate(u8g2, ruuvi_readings(), ruuvi_outdoor_sensor(),
                     config.ruuvi.count);
+      print_forecast_icon(u8g2, config);
     } else {
       setup_ruuvi_devices(config);
     }
@@ -168,9 +169,7 @@ void advertisementCallback(BLEAdvertisement* adv) {
     }
 
     for (uint8_t i = 0; i < config.ruuvi.count; i++) {
-      char known_addr[strlen(ruuvi_devices()[i].getAddressString())];
-      strcpy(known_addr, ruuvi_devices()[i].getAddressString());
-      if (!strcmp(adv_addr, known_addr)) {
+      if (!strcmp(adv_addr, ruuvi_devices()[i].getAddressString())) {
         uint8_t data[LE_ADVERTISING_DATA_SIZE];
         memcpy(data, adv->getAdvData(), LE_ADVERTISING_DATA_SIZE);
         if (data[0] != 0x11) {

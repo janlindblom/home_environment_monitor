@@ -23,7 +23,6 @@ void control_wireless(Config configuration,
 
 void    connect_network();
 void    disconnect_network();
-void    set_network_disconnected();
 bool    wifi_ap_configured();
 bool    network_connected();
 bool    network_disconnected();

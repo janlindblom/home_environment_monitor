@@ -17,8 +17,9 @@
 #endif
 #define NTP_TIMEOUT 3600
 
-void configure_network_time(Config config);
-bool network_time_set();
-bool network_time_received();
-void print_time(U8G2 u8g2, Config config);
-void configure_sunset(Config config);
+void   configure_network_time(Config config);
+bool   network_time_set();
+bool   network_time_received();
+void   print_time(U8G2 u8g2, Config config);
+void   configure_sunset(Config config);
+SunSet sun();
