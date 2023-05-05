@@ -32,31 +32,28 @@
 
 #define RUUVI_DEVICES 3
 
-BD_ADDR*      ruuvi_devices;
-bool*         ruuvi_outdoor_sensor;
-ruuvi_data_t* ruuvi_readings;
-time_t*       ruuvi_reading_time;
-
 uint32_t display_timer = 0;
 
-U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R1);
+U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R3);
 // U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R0);
 
 Config config;
 
-bool filesystem_safe = true;
+bool _filesystem_safe = true;
 
 void myPlugCB(uint32_t data) {
-  filesystem_safe = false;
+  _filesystem_safe = false;
 }
 
 void myUnplugCB(uint32_t data) {
-  filesystem_safe = true;
+  _filesystem_safe = true;
 }
 
 void myDeleteCB(uint32_t data) {
   // Maybe LittleFS.remove("myfile.txt")?  or do nothing
 }
+
+void load_config_file();
 
 /**
  * Main setup routine.
@@ -72,30 +69,8 @@ void setup() {
     Serial.begin(115200);
   }
 
-  Serial.println(F("Reading configuration..."));
-  load_configuration();
-  Serial.println(F("Configuration loaded."));
-  config = get_config();
-
-  if (configuration_loaded()) {
-    delete[] ruuvi_devices;
-    delete[] ruuvi_outdoor_sensor;
-    delete[] ruuvi_readings;
-    delete[] ruuvi_reading_time;
-    ruuvi_devices        = new BD_ADDR[config.ruuvi.count];
-    ruuvi_outdoor_sensor = new bool[config.ruuvi.count];
-    ruuvi_readings       = new ruuvi_data_t[config.ruuvi.count];
-    ruuvi_reading_time   = new time_t[config.ruuvi.count];
-
-    for (uint8_t i = 0; i < config.ruuvi.count; i++) {
-      ruuvi_data_t ruuvi_entry;
-      ruuvi_devices[i] = BD_ADDR(config.ruuvi.devices[i].addr);
-      ruuvi_outdoor_sensor[i] =
-          (!strcmp("outdoor", config.ruuvi.devices[i].placement));
-      ruuvi_readings[i]     = ruuvi_entry;
-      ruuvi_reading_time[i] = 0;
-    }
-  }
+  load_config_file();
+  setup_ruuvi_devices(config);
 
   u8g2.setI2CAddress(I2C_ADDRESS << 1);
   u8g2.begin();
@@ -120,27 +95,20 @@ void setup() {
   pir_init();
 }
 
+void load_config_file() {
+  if (_filesystem_safe) {
+    Serial.println(F("Reading configuration..."));
+    load_configuration();
+    Serial.println(F("Configuration loaded."));
+    config = get_config();
+  }
+}
+
 /**
  * Main program loop.
  */
 void loop() {
   delay(250);
-
-  u8g2.setFont(u8g2_font_helvR08_tf);
-  u8g2.clearBuffer();
-
-  print_wifi_status(u8g2);
-  if (configuration_loaded()) {
-    print_time(u8g2, config);
-  }
-  if (configuration_loaded() && bluetooth_configured()) {
-    print_bluetooth_status(u8g2);
-    print_climate(u8g2, ruuvi_readings, ruuvi_outdoor_sensor,
-                  config.ruuvi.count);
-    process_pressure(ruuvi_readings, ruuvi_outdoor_sensor, config);
-  }
-  u8g2.sendBuffer();
-  control_backlight(u8g2);
 
   if (configuration_loaded()) {
     control_wireless(config, advertisementCallback);
@@ -149,6 +117,29 @@ void loop() {
   if (bluetooth_configured()) {
     control_bluetooth_scanning();
   }
+
+  u8g2.setFont(u8g2_font_helvR08_tf);
+  u8g2.clearBuffer();
+
+  if (configured()) {
+    print_wifi_status(u8g2);
+    print_time(u8g2, config);
+  } else {
+    load_config_file();
+  }
+  if (configured() && bluetooth_configured()) {
+    print_bluetooth_status(u8g2);
+    if (ruuvi_devices_configured()) {
+      process_pressure(ruuvi_readings(), ruuvi_outdoor_sensor(), config);
+      print_climate(u8g2, ruuvi_readings(), ruuvi_outdoor_sensor(),
+                    config.ruuvi.count);
+    } else {
+      setup_ruuvi_devices(config);
+    }
+  }
+
+  u8g2.sendBuffer();
+  control_backlight(u8g2);
 }
 
 /**
@@ -172,22 +163,25 @@ void advertisementCallback(BLEAdvertisement* adv) {
     Serial.print(", Measured Power ");
     Serial.println(adv->getiBeaconMeasuredPower());
   } else {
+    if (!configured() || !ruuvi_devices_configured()) {
+      return;
+    }
+
     for (uint8_t i = 0; i < config.ruuvi.count; i++) {
-      char known_addr[strlen(ruuvi_devices[i].getAddressString())];
-      strcpy(known_addr, ruuvi_devices[i].getAddressString());
-      if (!strcmp(adv_addr,
-                  BD_ADDR(config.ruuvi.devices[i].addr).getAddressString())) {
+      char known_addr[strlen(ruuvi_devices()[i].getAddressString())];
+      strcpy(known_addr, ruuvi_devices()[i].getAddressString());
+      if (!strcmp(adv_addr, known_addr)) {
         uint8_t data[LE_ADVERTISING_DATA_SIZE];
         memcpy(data, adv->getAdvData(), LE_ADVERTISING_DATA_SIZE);
         if (data[0] != 0x11) {
           time_t       now   = time(nullptr);
           ruuvi_data_t rdata = make_ruuvi_data(data);
-          ruuvi_readings[i]  = rdata;
-          if ((ruuvi_reading_time[i] == 0) ||
-              difftime(now, ruuvi_reading_time[i]) >= 360.0f) {
+          store_ruuvi_reading(i, rdata);
+          if ((ruuvi_reading_times()[i] == 0) ||
+              difftime(now, ruuvi_reading_times()[i]) >= 360.0f) {
             Serial.println(
                 F("Six minutes since last logged reading, saving..."));
-            ruuvi_reading_time[i] = now;
+            store_ruuvi_reading_time(i, now);
             Serial.print(F("Logging Ruuvi device: "));
             Serial.println(config.ruuvi.devices[i].name);
             Serial.print(F("Current pressure trend: "));
@@ -205,7 +199,6 @@ void advertisementCallback(BLEAdvertisement* adv) {
             }
           }
         }
-        // BTstack.bleConnect(adv, 10000);
       }
     }
   }

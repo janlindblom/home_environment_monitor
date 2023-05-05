@@ -6,7 +6,6 @@
 #pragma once
 
 #include <Arduino.h>
-
 typedef struct ruuvi_device {
   char    name[16];
   char    placement[8];

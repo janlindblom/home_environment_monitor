@@ -6,28 +6,43 @@
 #include "ruuvi.h"
 
 #include <Arduino.h>
-
-// #include <list>
+#include <BTstackLib.h>
+#include <time.h>
 
 #include "common.h"
+#include "configuration.h"
 #include "ruuvi_types.h"
 
-ruuvi_device_t* ruuvi_device_data = 0;
-ruuvi_data_t*   ruuvi_data        = 0;
 // std::list<ruuvi_data_t> ruuvi_log;
 
-void setup_ruuvi_storage(unsigned int size) {
-  if (ruuvi_device_data != 0) {
-    delete[] ruuvi_device_data;
-  }
-  ruuvi_device_data = new ruuvi_device_t[size];
-}
+BD_ADDR*      _ruuvi_devices;
+bool*         _ruuvi_outdoor_sensor;
+ruuvi_data_t* _ruuvi_readings;
+time_t*       _ruuvi_reading_time;
+bool          _ruuvi_devices_configured = false;
 
-void setup_ruuvi_data_storage(unsigned int size) {
-  if (ruuvi_data != 0) {
-    delete[] ruuvi_data;
+void setup_ruuvi_devices(Config configuration) {
+  _ruuvi_devices_configured = false;
+  if (configured()) {
+    delete[] _ruuvi_devices;
+    delete[] _ruuvi_outdoor_sensor;
+    delete[] _ruuvi_readings;
+    delete[] _ruuvi_reading_time;
+    _ruuvi_devices        = new BD_ADDR[configuration.ruuvi.count];
+    _ruuvi_outdoor_sensor = new bool[configuration.ruuvi.count];
+    _ruuvi_readings       = new ruuvi_data_t[configuration.ruuvi.count];
+    _ruuvi_reading_time   = new time_t[configuration.ruuvi.count];
+
+    for (uint8_t i = 0; i < configuration.ruuvi.count; i++) {
+      ruuvi_data_t ruuvi_entry;
+      _ruuvi_devices[i] = BD_ADDR(configuration.ruuvi.devices[i].addr);
+      _ruuvi_outdoor_sensor[i] =
+          (!strcmp("outdoor", configuration.ruuvi.devices[i].placement));
+      _ruuvi_readings[i]     = ruuvi_entry;
+      _ruuvi_reading_time[i] = 0;
+    }
+    _ruuvi_devices_configured = true;
   }
-  ruuvi_data = new ruuvi_data_t[size];
 }
 
 /**
@@ -48,4 +63,32 @@ ruuvi_data_t make_ruuvi_data(uint8_t data[]) {
   res.humidity    = hum * 0.0025f;
   res.pressure    = pres + 50000;
   return res;
+}
+
+bool ruuvi_devices_configured() {
+  return _ruuvi_devices_configured;
+}
+
+BD_ADDR* ruuvi_devices() {
+  return _ruuvi_devices;
+}
+
+bool* ruuvi_outdoor_sensor() {
+  return _ruuvi_outdoor_sensor;
+}
+
+ruuvi_data_t* ruuvi_readings() {
+  return _ruuvi_readings;
+}
+
+void store_ruuvi_reading(uint8_t i, ruuvi_data_t rdata) {
+  _ruuvi_readings[i] = rdata;
+}
+
+time_t* ruuvi_reading_times() {
+  return _ruuvi_reading_time;
+}
+
+void store_ruuvi_reading_time(uint8_t i, time_t time) {
+  _ruuvi_reading_time[i] = time;
 }
