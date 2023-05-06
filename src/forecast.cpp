@@ -192,13 +192,13 @@ void print_forecast_icon(U8G2 u8g2, Config configuration) {
   localtime_r(&now, &local);
   gmtime_r(&now, &gmt);
   sun().setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
-  int  sunrise = static_cast<int>(sun().calcSunrise());
-  int  sunset  = static_cast<int>(sun().calcSunset());
-  bool day =
-      ((local.tm_hour >= (sunrise / 60)) && (local.tm_min >= (sunrise % 60)) &&
-       (local.tm_hour < (sunset / 60)) && (local.tm_min < (sunset % 60)));
+  int sunrise = static_cast<int>(sun().calcSunrise());
+  int sunset  = static_cast<int>(sun().calcSunset());
 
-  u8g2.setFont(u8g2_font_waffle_t_all);
+  bool day = ((local.tm_hour * 60 + local.tm_min >= sunrise) &&
+              (local.tm_hour * 60 + local.tm_min < sunset));
+
+  u8g2.setFont(u8g2_font_siji_t_6x10);
   u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,
                  u8g2.getDisplayHeight() - 1,
                  forecast_icon(forecast.forecast, day));
