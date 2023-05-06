@@ -8,20 +8,14 @@
 #include <U8g2lib.h>
 #include <WiFi.h>
 
-#include "arduino_secrets.h"
 #include "configuration_types.h"
-
-#ifndef STASSID
-#  define STASSID "no-network"
-#  define STAPSK "no-password"
-#endif
 
 enum WiFiSignal { AMAZING, GREAT, GOOD, OK, BAD, UNUSABLE };
 
 void control_wireless(Config configuration,
                       void (*callback)(BLEAdvertisement* bleAdvertisement));
 
-void    connect_network();
+void    connect_network(Config configuration);
 void    disconnect_network();
 bool    wifi_ap_configured();
 bool    network_connected();

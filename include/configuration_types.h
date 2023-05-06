@@ -10,8 +10,8 @@
 #include "ruuvi_types.h"
 
 typedef struct network_section_entry {
-  char ssid[32];
-  char password[63];
+  char* ssid;
+  char* password;
 } network_section_entry_t;
 
 typedef struct network_section {

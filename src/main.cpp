@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "arduino_secrets.h"
 #include "climate.h"
 #include "common.h"
 #include "configuration.h"
@@ -83,16 +82,16 @@ void setup() {
                splash_logo_width, splash_logo_height, splash_logo_bits);
   u8g2.sendBuffer();
 
-  // control_backlight(u8g2);
+  control_backlight(u8g2);
   delay(1000);
 
   u8g2.clearBuffer();
   u8g2.sendBuffer();
 
   Serial.println(F("Connecting to WiFi..."));
-  connect_network();
+  connect_network(config);
   Serial.println(F("WiFi connection configured."));
-  pir_init();
+  // pir_init();
 }
 
 void load_config_file() {

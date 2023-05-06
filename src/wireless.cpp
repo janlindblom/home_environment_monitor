@@ -28,13 +28,6 @@ bool _bluetooth_configuring = false;
 
 uint32_t comms_timer = 0;
 
-const char* ssid     = STASSID;
-const char* password = STAPSK;
-#ifdef SECSSID
-const char* ssid2     = SECSSID;
-const char* password2 = SECPSK;
-#endif
-
 WiFiMulti multi;
 
 /**
@@ -48,7 +41,7 @@ void control_wireless(Config configuration,
                       void (*callback)(BLEAdvertisement* bleAdvertisement)) {
   if (!_network_connected && !network_time_set()) {
     Serial.println(F("No network connection, trying to connect."));
-    connect_network();
+    connect_network(configuration);
   } else if (_network_connected && !network_time_set()) {
     configure_network_time(configuration);
   } else if (network_time_set() && _network_connected) {
@@ -67,8 +60,8 @@ void control_wireless(Config configuration,
 /**
  * Connects to WiFi.
  */
-void connect_network() {
-  if (_network_setup_running || WiFi.connected()) {
+void connect_network(Config configuration) {
+  if (!configured() || _network_setup_running || WiFi.connected()) {
     return;
   }
 
@@ -77,17 +70,18 @@ void connect_network() {
   WiFi.setHostname("envmon");
 
   if (!_wifi_ap_configured) {
-#ifdef STASSID
-    if (multi.addAP(ssid, password)) {
-#  ifdef SECSSID
-      if (multi.addAP(ssid2, password2)) {
-#  endif
+    if (strlen(configuration.networks.primary.ssid) > 0) {
+      if (multi.addAP(configuration.networks.primary.ssid,
+                      configuration.networks.primary.password)) {
         _wifi_ap_configured = true;
-#  ifdef SECSSID
       }
-#  endif
     }
-#endif
+    if (strlen(configuration.networks.secondary.ssid) > 0) {
+      if (multi.addAP(configuration.networks.secondary.ssid,
+                      configuration.networks.secondary.password)) {
+        _wifi_ap_configured = true;
+      }
+    }
   }
 
   _network_connected     = (multi.run() == WL_CONNECTED);

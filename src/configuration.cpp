@@ -52,23 +52,26 @@ void load_configuration() {
   for (JsonPair network : doc["networks"].as<JsonObject>()) {
     const char* network_key = network.key().c_str(); // "primary", "secondary"
 
-    const char* network_value_ssid     = network.value()["ssid"] | "";
-    const char* network_value_password = network.value()["password"] | "";
+    const char* network_value_ssid     = network.value()["ssid"];
+    const char* network_value_password = network.value()["password"];
+
+    char* ssid     = new char[strlen(network_value_ssid) + 1];
+    char* password = new char[strlen(network_value_password) + 1];
+
+    strcpy(ssid, network_value_ssid);
+    strcpy(password, network_value_password);
 
     if (!strcmp(network_key, "primary")) {
-      strncpy(_config.networks.primary.ssid, network_value_ssid,
-              sizeof(_config.networks.primary.ssid));
-      strncpy(_config.networks.primary.password, network_value_password,
-              sizeof(_config.networks.primary.password));
+      _config.networks.primary.ssid     = ssid;
+      _config.networks.primary.password = password;
     } else if (!strcmp(network_key, "secondary")) {
-      strncpy(_config.networks.secondary.ssid, network_value_ssid,
-              sizeof(_config.networks.secondary.ssid));
-      strncpy(_config.networks.secondary.password, network_value_password,
-              sizeof(_config.networks.secondary.password));
+      _config.networks.secondary.ssid     = ssid;
+      _config.networks.secondary.password = password;
     }
   }
 
-  strncpy(_config.timezone, doc["timezone"] | "GMT", sizeof(_config.timezone));
+  const char* tz = doc["timezone"] | "GMT";
+  strncpy(_config.timezone, tz, strlen(tz) + 1);
 
   JsonObject location        = doc["location"];
   _config.location.latitude  = location["latitude"];

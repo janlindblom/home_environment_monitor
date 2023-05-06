@@ -1,12 +1,12 @@
 {
   "networks": {
     "primary": {
-      "ssid": "",
-      "password": ""
+      "ssid": "network1",
+      "password": "password1"
     },
     "secondary": {
-      "ssid": "",
-      "password": ""
+      "ssid": "network2",
+      "password": "password2"
     }
   },
   "timezone": "Europe/Mariehamn",
