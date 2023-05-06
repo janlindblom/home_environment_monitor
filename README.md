@@ -37,7 +37,9 @@ Earlier version of the code running on a Raspberry Pi Pico W connected to a SH11
 
 ## License
 
-This project is Copyright (c) 2023 Jan Lindblom and released under the MIT license with exceptions for included external libraries, files or parts of files which retain their respective licenses.
+Copyright © 2023 Jan Lindblom.
+
+Released under the MIT license except for any included external libraries, files or parts of files which retain their respective licenses.
 
 [arduino-pico]: https://github.com/earlephilhower/arduino-pico
 [earlephilhower]: https://github.com/earlephilhower

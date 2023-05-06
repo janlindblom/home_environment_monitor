@@ -150,6 +150,21 @@ bool summer() {
 }
 
 /**
+ * Tell if it's currently daytime.
+ */
+bool day() {
+  time_t    now = time(nullptr);
+  struct tm local, gmt;
+  localtime_r(&now, &local);
+  gmtime_r(&now, &gmt);
+  sun().setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
+  int sunrise = static_cast<int>(sun().calcSunrise());
+  int sunset  = static_cast<int>(sun().calcSunset());
+  return ((local.tm_hour * 60 + local.tm_min >= sunrise) &&
+          (local.tm_hour * 60 + local.tm_min < sunset));
+}
+
+/**
  * Get a forecast based on the Zambretti algorithm.
  *
  * \param configuration the parsed config file
@@ -185,25 +200,28 @@ zambretti_forecast_t get_forecast(Config configuration) {
   return forecast[z - 1];
 }
 
+/**
+ * Print an icon representing the current forecast on the OLED. Displays as a
+ * little icon between the wireless indicators and the sunrise/sunset times.
+ *
+ * \param u8g2 the OLED display
+ * \param configuration the processed config file
+ */
 void print_forecast_icon(U8G2 u8g2, Config configuration) {
   zambretti_forecast_t forecast = get_forecast(configuration);
-  time_t               now      = time(nullptr);
-  struct tm            local, gmt;
-  localtime_r(&now, &local);
-  gmtime_r(&now, &gmt);
-  sun().setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
-  int sunrise = static_cast<int>(sun().calcSunrise());
-  int sunset  = static_cast<int>(sun().calcSunset());
-
-  bool day = ((local.tm_hour * 60 + local.tm_min >= sunrise) &&
-              (local.tm_hour * 60 + local.tm_min < sunset));
 
   u8g2.setFont(u8g2_font_siji_t_6x10);
   u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,
                  u8g2.getDisplayHeight() - 1,
-                 forecast_icon(forecast.forecast, day));
+                 forecast_icon(forecast.forecast, day()));
 }
 
+/**
+ * Find a fitting icon representing the given Zambretti forecast code.
+ *
+ * \param forecast the Zambretti forecast code
+ * \param day whether it's daytime or not
+ */
 uint16_t forecast_icon(char forecast, bool day = true) {
   uint16_t icon_offset = 57899;
   uint16_t icon        = 63;
