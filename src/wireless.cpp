@@ -70,15 +70,15 @@ void connect_network(Config configuration) {
   WiFi.setHostname("envmon");
 
   if (!_wifi_ap_configured) {
-    if (strlen(configuration.networks.primary.ssid) > 0) {
-      if (multi.addAP(configuration.networks.primary.ssid,
-                      configuration.networks.primary.password)) {
-        _wifi_ap_configured = true;
-      }
-    }
     if (strlen(configuration.networks.secondary.ssid) > 0) {
       if (multi.addAP(configuration.networks.secondary.ssid,
                       configuration.networks.secondary.password)) {
+        _wifi_ap_configured = true;
+      }
+    }
+    if (strlen(configuration.networks.primary.ssid) > 0) {
+      if (multi.addAP(configuration.networks.primary.ssid,
+                      configuration.networks.primary.password)) {
         _wifi_ap_configured = true;
       }
     }

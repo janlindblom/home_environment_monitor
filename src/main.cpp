@@ -34,7 +34,7 @@
 uint32_t display_timer = 0;
 
 U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R3);
-// U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R0);
+//U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R3);
 
 Config config;
 
@@ -67,7 +67,7 @@ void setup() {
   if (!Serial) {
     Serial.begin(115200);
   }
-
+delay(10000);
   load_config_file();
   setup_ruuvi_devices(config);
 
