@@ -19,6 +19,20 @@ int32_t  _pressure_trend        = 0;
 time_t   last_pressure          = 0;
 uint32_t _average_pressure      = 0;
 float    _average_temperature   = 0;
+float    pressure_readings[18];
+
+void log_pressure_reading(float new_last_element) {
+  for (uint8_t i = 0; i < sizeof(pressure_readings) / sizeof(float) - 1; i++) {
+    pressure_readings[i] = pressure_readings[i + 1];
+  }
+  pressure_readings[sizeof(pressure_readings) / sizeof(float) - 1] =
+      new_last_element;
+}
+
+float get_pressure_trend() {
+  return (pressure_readings[sizeof(pressure_readings) / sizeof(float) - 1] -
+          pressure_readings[0]);
+}
 
 void process_pressure(ruuvi_data_t ruuvi_readings[],
                       bool ruuvi_outdoor_sensor[], Config configuration) {

@@ -15,7 +15,11 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // Pin connections
-#ifdef ARDUINO_ARCH_RP2040
+#ifdef __AVR__
+#  define PIN_LDR A0
+#  define PIN_LDR_PWR D13
+#  define PIN_PIR D12
+#else
 #  define PIN_LDR A0
 #  define PIN_LDR_PWR D22
 #  define PIN_PIR D21

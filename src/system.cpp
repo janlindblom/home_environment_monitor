@@ -27,13 +27,23 @@ void check_ambient_light() {
   uint16_t total   = 0;
   uint16_t reading = 0;
 
-  // Set PIN_LDR_PWR high then wait a little bit before reading PIN_LDR.
+// Set PIN_LDR_PWR high then wait a little bit before reading PIN_LDR.
+#ifdef __AVR__
+  digitalWrite(PIN_LDR_PWR,
+               PinStatus::HIGH); // TODO: Replace with direct PORT manipulation
+#else
   digitalWrite(PIN_LDR_PWR, PinStatus::HIGH);
+#endif
   delay(50);
   for (uint8_t i = 0; i < 4; i++) {
     total += analogRead(PIN_LDR);
   }
+#ifdef __AVR__
+  digitalWrite(PIN_LDR_PWR,
+               PinStatus::LOW); // TODO: Replace with direct PORT manipulation
+#else
   digitalWrite(PIN_LDR_PWR, PinStatus::LOW);
+#endif
 
   reading = total >> 2;
 
@@ -70,7 +80,7 @@ void control_backlight(U8G2 u8g2) {
  * Configure the backlight control part.
  */
 void setup_backlight() {
-#if defined(ARDUINO_ARCH_RP2040)
+#ifndef __AVR__
   analogReadResolution(12);
   adc_max = 4095; // We get a bigger range on the rp2040
   pinMode(PIN_LDR_PWR, PinMode::OUTPUT_12MA);
