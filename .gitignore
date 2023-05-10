@@ -4,6 +4,7 @@
 .vscode/launch.json
 .vscode/ipch
 .ccls
+compile_commands.json
 arduino_secrets.h
 *.bak
 *cache

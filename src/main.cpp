@@ -29,8 +29,6 @@
 #include "system.h"
 #include "wireless.h"
 
-#define RUUVI_DEVICES 3
-
 uint32_t display_timer = 0;
 
 U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R3);
