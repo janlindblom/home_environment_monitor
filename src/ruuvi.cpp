@@ -9,17 +9,18 @@
 #include <BTstackLib.h>
 #include <time.h>
 
+#include <vector>
+
 #include "common.h"
 #include "configuration.h"
 #include "ruuvi_types.h"
 
-// std::list<ruuvi_data_t> ruuvi_log;
-
-BD_ADDR*      _ruuvi_devices;
-bool*         _ruuvi_outdoor_sensor;
-ruuvi_data_t* _ruuvi_readings;
-time_t*       _ruuvi_reading_time;
-bool          _ruuvi_devices_configured = false;
+std::vector<BD_ADDR> _ruuvi_device_addresses;
+BD_ADDR*             _ruuvi_devices;
+bool*                _ruuvi_outdoor_sensor;
+ruuvi_data_t*        _ruuvi_readings;
+time_t*              _ruuvi_reading_time;
+bool                 _ruuvi_devices_configured = false;
 
 void setup_ruuvi_devices(Config configuration) {
   _ruuvi_devices_configured = false;
@@ -28,19 +29,34 @@ void setup_ruuvi_devices(Config configuration) {
     delete[] _ruuvi_outdoor_sensor;
     delete[] _ruuvi_readings;
     delete[] _ruuvi_reading_time;
-    _ruuvi_devices        = new BD_ADDR[configuration.ruuvi.count];
-    _ruuvi_outdoor_sensor = new bool[configuration.ruuvi.count];
-    _ruuvi_readings       = new ruuvi_data_t[configuration.ruuvi.count];
-    _ruuvi_reading_time   = new time_t[configuration.ruuvi.count];
 
-    for (uint8_t i = 0; i < configuration.ruuvi.count; i++) {
+    _ruuvi_devices = new BD_ADDR[configuration.ruuvi.ruuvi_devices.size()];
+    _ruuvi_outdoor_sensor = new bool[configuration.ruuvi.ruuvi_devices.size()];
+    _ruuvi_readings =
+        new ruuvi_data_t[configuration.ruuvi.ruuvi_devices.size()];
+    _ruuvi_reading_time = new time_t[configuration.ruuvi.ruuvi_devices.size()];
+
+    for (size_t i = 0; i < configuration.ruuvi.ruuvi_devices.size(); i++) {
       ruuvi_data_t ruuvi_entry;
-      _ruuvi_devices[i] = BD_ADDR(configuration.ruuvi.devices[i].addr);
+      _ruuvi_device_addresses.push_back(
+          configuration.ruuvi.ruuvi_devices[i].bt_addr);
+      _ruuvi_devices[i] = configuration.ruuvi.ruuvi_devices[i].bt_addr;
       _ruuvi_outdoor_sensor[i] =
-          (!strcmp("outdoor", configuration.ruuvi.devices[i].placement));
+          (!strcmp("outdoor", configuration.ruuvi.ruuvi_devices[i].placement));
       _ruuvi_readings[i]     = ruuvi_entry;
       _ruuvi_reading_time[i] = 0;
     }
+    _ruuvi_device_addresses.shrink_to_fit();
+    /*
+        for (uint8_t i = 0; i < configuration.ruuvi.count; i++) {
+          ruuvi_data_t ruuvi_entry;
+          _ruuvi_devices[i] = BD_ADDR(configuration.ruuvi.devices[i].addr);
+          _ruuvi_outdoor_sensor[i] =
+              (!strcmp("outdoor", configuration.ruuvi.devices[i].placement));
+          _ruuvi_readings[i]     = ruuvi_entry;
+          _ruuvi_reading_time[i] = 0;
+        }
+    */
     _ruuvi_devices_configured = true;
   }
 }

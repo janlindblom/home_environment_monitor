@@ -14,5 +14,8 @@ program:
 uploadfs:
 	pio -f -c vim run --target uploadfs
 
+compiledb:
+	pio -f -c vim run --target compiledb
+
 update:
 	pio -f -c vim pkg update

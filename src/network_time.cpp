@@ -12,6 +12,8 @@
 #include <time.h>
 #include <timezonedb_lookup.h>
 
+#include <string>
+
 #include "common.h"
 #include "configuration.h"
 #include "configuration_types.h"
@@ -58,7 +60,9 @@ void configure_network_time(Config configuration) {
   time_t now = time(nullptr);
   if (now > 57600) {
     Serial.println(F("NTP time response from network, processing."));
-    const char* tz = lookup_posix_timezone_tz(configuration.timezone);
+    const char* tz = lookup_posix_timezone_tz(configuration.timezone.c_str());
+    Serial.print(F("Setting up timezone: "));
+    Serial.println(tz);
     setenv("TZ", tz, 1);
     tzset();
 

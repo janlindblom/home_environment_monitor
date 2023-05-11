@@ -7,8 +7,11 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <BTstackLib.h>
 #include <LittleFS.h>
 #include <string.h>
+
+#include <vector>
 
 #include "configuration_types.h"
 
@@ -16,6 +19,10 @@ bool   _configured           = false;
 bool   _configuration_loaded = false;
 Config _config;
 
+/**
+ * This is from the initial implementation since BD_ADDR in arduino-pico does
+ * not (yet) have a constructor that takes a char* as input.
+ */
 void parseBytes(const char* str, char sep, byte* bytes, int maxBytes,
                 int base) {
   for (int i = 0; i < maxBytes; i++) {
@@ -70,8 +77,8 @@ void load_configuration() {
     }
   }
 
-  const char* tz = doc["timezone"] | "GMT";
-  strncpy(_config.timezone, tz, strlen(tz) + 1);
+  const char* tz   = doc["timezone"] | "GMT";
+  _config.timezone = std::string(tz);
 
   JsonObject location        = doc["location"];
   _config.location.latitude  = location["latitude"];
@@ -82,17 +89,30 @@ void load_configuration() {
   uint8_t device_number = 0;
   for (JsonObject ruuvi_device : doc["ruuvi"]["devices"].as<JsonArray>()) {
     ruuvi_device_t device;
-    strncpy(device.name, ruuvi_device["name"], sizeof(device.name));
-    strncpy(device.placement, ruuvi_device["placement"],
+
+    const char* device_name = ruuvi_device["name"];
+    device.device_name      = std::string(device_name);
+    strncpy(device.name, device.device_name.c_str(), sizeof(device.name));
+
+    const char* device_placement = ruuvi_device["placement"];
+    device.device_placement      = std::string(device_placement);
+    strncpy(device.placement, device.device_placement.c_str(),
             sizeof(device.placement));
+
     strncpy(device.address, ruuvi_device["address"], sizeof(device.address));
 
     uint8_t addr[6];
     parseBytes(ruuvi_device["address"], ':', addr, 6, 16);
+    // device.bt_addr = BD_ADDR(addr);
+    // This depends on PR#1440 to be merged into arduino-pico otherwise, use the
+    // line above.
+    device.bt_addr = BD_ADDR(device.address);
     memcpy(device.addr, addr, sizeof(device.addr));
     _config.ruuvi.devices[device_number] = device;
+    _config.ruuvi.ruuvi_devices.push_back(device);
     device_number++;
   }
+  _config.ruuvi.ruuvi_devices.shrink_to_fit();
   _config.ruuvi.count = device_number;
 
   if (error) {

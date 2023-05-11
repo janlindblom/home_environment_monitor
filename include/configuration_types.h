@@ -7,6 +7,9 @@
 
 #include <Arduino.h>
 
+#include <string>
+#include <vector>
+
 #include "ruuvi_types.h"
 
 typedef struct network_section_entry {
@@ -29,11 +32,13 @@ typedef struct location_section {
 typedef struct ruuvi_section {
   uint8_t        count;
   ruuvi_device_t devices[10];
+  std::vector<ruuvi_device_t>
+      ruuvi_devices; // Variable length vector list of ruuvi devices
 } ruuvi_t;
 
 struct Config {
   network_section_t networks;
-  char              timezone[64];
+  std::string       timezone;
   location_t        location;
   ruuvi_t           ruuvi;
 };

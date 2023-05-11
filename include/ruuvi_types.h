@@ -6,11 +6,17 @@
 #pragma once
 
 #include <Arduino.h>
+#include <BTstackLib.h>
+
+#include <string>
 typedef struct ruuvi_device {
-  char    name[16];
-  char    placement[8];
-  char    address[17];
-  uint8_t addr[6];
+  char        name[16];
+  std::string device_name; // Variable length device name string
+  char        placement[8];
+  std::string device_placement; // Variable length device placement string
+  char        address[17];
+  uint8_t     addr[6];
+  BD_ADDR     bt_addr;
 } ruuvi_device_t;
 
 typedef struct ruuvi_data {
