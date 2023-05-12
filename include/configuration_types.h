@@ -13,32 +13,30 @@
 #include "ruuvi_types.h"
 
 typedef struct network_section_entry {
-  char* ssid;
-  char* password;
+  std::string ssid;     // SSID of network
+  std::string password; // Password for network
 } network_section_entry_t;
 
 typedef struct network_section {
-  network_section_entry_t primary;
-  network_section_entry_t secondary;
+  network_section_entry_t primary;   // Primary network
+  network_section_entry_t secondary; // Secondary network
 } network_section_t;
 
 typedef struct location_section {
-  float longitude;
-  float latitude;
-  float tz_offset;
-  int   elevation;
+  float longitude; // Longitude of location
+  float latitude;  // Latitude of location
+  float tz_offset; // Timezone offset
+  int   elevation; // Altitude above sea level
 } location_t;
 
 typedef struct ruuvi_section {
-  uint8_t        count;
-  ruuvi_device_t devices[10];
-  std::vector<ruuvi_device_t>
-      ruuvi_devices; // Variable length vector list of ruuvi devices
-} ruuvi_t;
+  uint8_t                     count;
+  std::vector<ruuvi_device_t> devices; // Variable length list of sensors
+} ruuvi_section_t;
 
 struct Config {
-  network_section_t networks;
-  std::string       timezone;
-  location_t        location;
-  ruuvi_t           ruuvi;
+  network_section_t networks; // Network section
+  std::string       timezone; // Timezone
+  location_t        location; // Geographic location section
+  ruuvi_section_t   ruuvi;    // Ruuvi device section
 };

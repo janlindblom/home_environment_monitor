@@ -25,3 +25,6 @@ insert_final_newline = true
 
 [*.ini]
 indent_style = tab
+
+[Makefile]
+indent_style = tab

@@ -11,6 +11,7 @@
 #include <LittleFS.h>
 #include <string.h>
 
+#include <string>
 #include <vector>
 
 #include "configuration_types.h"
@@ -62,18 +63,12 @@ void load_configuration() {
     const char* network_value_ssid     = network.value()["ssid"];
     const char* network_value_password = network.value()["password"];
 
-    char* ssid     = new char[strlen(network_value_ssid) + 1];
-    char* password = new char[strlen(network_value_password) + 1];
-
-    strcpy(ssid, network_value_ssid);
-    strcpy(password, network_value_password);
-
     if (!strcmp(network_key, "primary")) {
-      _config.networks.primary.ssid     = ssid;
-      _config.networks.primary.password = password;
+      _config.networks.primary.ssid     = std::string(network_value_ssid);
+      _config.networks.primary.password = std::string(network_value_password);
     } else if (!strcmp(network_key, "secondary")) {
-      _config.networks.secondary.ssid     = ssid;
-      _config.networks.secondary.password = password;
+      _config.networks.secondary.ssid     = std::string(network_value_ssid);
+      _config.networks.secondary.password = std::string(network_value_password);
     }
   }
 
@@ -91,15 +86,13 @@ void load_configuration() {
     ruuvi_device_t device;
 
     const char* device_name = ruuvi_device["name"];
-    device.device_name      = std::string(device_name);
-    strncpy(device.name, device.device_name.c_str(), sizeof(device.name));
+    device.name             = std::string(device_name);
 
     const char* device_placement = ruuvi_device["placement"];
-    device.device_placement      = std::string(device_placement);
-    strncpy(device.placement, device.device_placement.c_str(),
-            sizeof(device.placement));
+    device.placement             = std::string(device_placement);
 
-    strncpy(device.address, ruuvi_device["address"], sizeof(device.address));
+    const char* device_address = ruuvi_device["address"];
+    strncpy(device.address, device_address, sizeof(device.address));
 
     uint8_t addr[6];
     parseBytes(ruuvi_device["address"], ':', addr, 6, 16);
@@ -108,11 +101,11 @@ void load_configuration() {
     // line above.
     device.bt_addr = BD_ADDR(device.address);
     memcpy(device.addr, addr, sizeof(device.addr));
-    _config.ruuvi.devices[device_number] = device;
-    _config.ruuvi.ruuvi_devices.push_back(device);
+    //_config.ruuvi.devices[device_number] = device;
+    _config.ruuvi.devices.push_back(device);
     device_number++;
   }
-  _config.ruuvi.ruuvi_devices.shrink_to_fit();
+  _config.ruuvi.devices.shrink_to_fit();
   _config.ruuvi.count = device_number;
 
   if (error) {

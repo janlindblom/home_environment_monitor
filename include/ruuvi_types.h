@@ -10,10 +10,8 @@
 
 #include <string>
 typedef struct ruuvi_device {
-  char        name[16];
-  std::string device_name; // Variable length device name string
-  char        placement[8];
-  std::string device_placement; // Variable length device placement string
+  std::string name;      // Variable length device name string
+  std::string placement; // Variable length device placement string
   char        address[17];
   uint8_t     addr[6];
   BD_ADDR     bt_addr;

@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <BTstackLib.h>
+#include <EEPROM.h>
 #include <LittleFS.h>
 #include <SPI.h>
 #include <SingleFileDrive.h>
@@ -16,6 +17,10 @@
 #include <sunset.h>
 #include <sys/time.h>
 #include <time.h>
+
+#include <iterator>
+#include <string>
+#include <vector>
 
 #include "climate.h"
 #include "common.h"
@@ -32,7 +37,7 @@
 uint32_t display_timer = 0;
 
 U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R3);
-//U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R3);
+// U8G2_SSD1327_WS_128X128_F_HW_I2C u8g2(U8G2_R3);
 
 Config config;
 
@@ -56,6 +61,9 @@ void load_config_file();
  * Main setup routine.
  */
 void setup() {
+  // Initialise EEPROM with room for two floats.
+  EEPROM.begin(2 * sizeof(float));
+
   LittleFS.begin();
   /* singleFileDrive.onPlug(myPlugCB);
   singleFileDrive.onUnplug(myUnplugCB);
@@ -65,7 +73,7 @@ void setup() {
   if (!Serial) {
     Serial.begin(115200);
   }
-delay(10000);
+
   load_config_file();
   setup_ruuvi_devices(config);
 
@@ -165,11 +173,13 @@ void advertisementCallback(BLEAdvertisement* adv) {
       return;
     }
 
-    for (uint8_t i = 0; i < config.ruuvi.count; i++) {
-      if (!strcmp(adv_addr, ruuvi_devices()[i].getAddressString())) {
+    for (size_t i = 0; i < get_config().ruuvi.devices.size(); i++) {
+      if (!strcmp(adv_addr,
+                  get_config().ruuvi.devices[i].bt_addr.getAddressString())) {
         uint8_t data[LE_ADVERTISING_DATA_SIZE];
         memcpy(data, adv->getAdvData(), LE_ADVERTISING_DATA_SIZE);
-        if (data[0] != 0x11) {
+        if ((data[0] != 0x11) && ((data[3] == 0x1B) && (data[4] == 0xFF) &&
+                                  (data[5] == 0x99) && (data[6] == 0x04))) {
           time_t       now   = time(nullptr);
           ruuvi_data_t rdata = make_ruuvi_data(data);
           store_ruuvi_reading(i, rdata);
@@ -179,7 +189,7 @@ void advertisementCallback(BLEAdvertisement* adv) {
                 F("Six minutes since last logged reading, saving..."));
             store_ruuvi_reading_time(i, now);
             Serial.print(F("Logging Ruuvi device: "));
-            Serial.println(config.ruuvi.devices[i].name);
+            Serial.println(get_config().ruuvi.devices[i].name.c_str());
             Serial.print(F("Current pressure trend: "));
             Serial.println(pressure_trend());
             Serial.print(F("Zambretti trend: "));

@@ -11,6 +11,8 @@
 #include <U8g2lib.h>
 #include <WiFi.h>
 
+#include <string>
+
 #include "common.h"
 #include "configuration.h"
 #include "network_time.h"
@@ -70,15 +72,15 @@ void connect_network(Config configuration) {
   WiFi.setHostname("envmon");
 
   if (!_wifi_ap_configured) {
-    if (strlen(configuration.networks.secondary.ssid) > 0) {
-      if (multi.addAP(configuration.networks.secondary.ssid,
-                      configuration.networks.secondary.password)) {
+    if (configuration.networks.secondary.ssid.length() > 0) {
+      if (multi.addAP(configuration.networks.secondary.ssid.c_str(),
+                      configuration.networks.secondary.password.c_str())) {
         _wifi_ap_configured = true;
       }
     }
-    if (strlen(configuration.networks.primary.ssid) > 0) {
-      if (multi.addAP(configuration.networks.primary.ssid,
-                      configuration.networks.primary.password)) {
+    if (configuration.networks.primary.ssid.length() > 0) {
+      if (multi.addAP(configuration.networks.primary.ssid.c_str(),
+                      configuration.networks.primary.password.c_str())) {
         _wifi_ap_configured = true;
       }
     }

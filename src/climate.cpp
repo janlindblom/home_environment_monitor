@@ -6,6 +6,7 @@
 #include "climate.h"
 
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <U8g2lib.h>
 #include <time.h>
 
@@ -20,6 +21,8 @@ time_t   last_pressure          = 0;
 uint32_t _average_pressure      = 0;
 float    _average_temperature   = 0;
 float    pressure_readings[18];
+
+float _average_temperatures[2] = {0.0f, 0.0f};
 
 void log_pressure_reading(float new_last_element) {
   for (uint8_t i = 0; i < sizeof(pressure_readings) / sizeof(float) - 1; i++) {
@@ -88,6 +91,10 @@ float pressure_trend() {
               : pressure_trend_data[1] - pressure_trend_data[0]);
 }
 
+void log_current_temperature(float temperature, bool location_outdoor = false) {
+  EEPROM.update(0 + (location_outdoor * sizeof(float)), temperature);
+}
+
 void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
                    bool ruuvi_outdoor_sensor[], uint8_t ruuvi_sensor_count) {
   uint8_t yoffset = 1;
@@ -110,7 +117,6 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
   }
 
   for (uint8_t i = 0; i < 2; i++) {
-    // u8g2.setFont(u8g2_font_helvB10_tf);
     u8g2.setFont(font_segments_12x17);
     yoffset += u8g2.getMaxCharHeight() + 2;
     char    temperature_string[8];
@@ -125,25 +131,16 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
     sprintf(temperature_string, "%2.1f°C", average_temperature);
     sprintf(humidity_string, "%3d%c", int(average_humidity), '%');
 
-    // u8g2.setFont(u8g2_font_unifont_t_weather);
     u8g2.setFont((i == 0 ? u8g2_font_open_iconic_embedded_2x_t
                          : u8g2_font_open_iconic_thing_2x_t));
     u8g2.drawGlyph(xoffset, yoffset, (i == 0 ? 68 : 76));
-    // u8g2.drawGlyph(xoffset, yoffset, 49);
     xoffset += u8g2.getMaxCharWidth() + 2;
-    //  u8g2.setFont(u8g2_font_helvB10_tf);
     u8g2.setFont(font_segments_12x17);
     u8g2.drawUTF8(xoffset, yoffset, temperature_string);
 
-    // xoffset += u8g2.getUTF8Width(temperature_string);
-    // u8g2.setFont(u8g2_font_unifont_t_weather);
-    // u8g2.drawGlyph(xoffset, yoffset, 50);
-    // xoffset += u8g2.getMaxCharWidth();
-    //  u8g2.setFont(u8g2_font_helvR10_tf);
     u8g2.setFont(font_segments_12x17);
     xoffset = u8g2.getUTF8Width(humidity_string);
     u8g2.drawUTF8(u8g2.getDisplayWidth() - xoffset - 1, yoffset,
                   humidity_string);
-    // xoffset += u8g2.getStrWidth(humidity_string);
   }
 }
