@@ -12,15 +12,14 @@
 #include "configuration_types.h"
 #include "ruuvi_types.h"
 
-void setup_ruuvi_devices(Config configuration);
-
+void setup_ruuvi_devices();
 bool ruuvi_devices_configured();
 
-std::vector<BD_ADDR> ruuvi_devices();
-bool*                ruuvi_outdoor_sensor();
+std::vector<uint8_t> ruuvi_outdoor_sensor();
 ruuvi_data_t*        ruuvi_readings();
-time_t*              ruuvi_reading_times();
+std::vector<time_t>  ruuvi_reading_times();
 
 ruuvi_data_t make_ruuvi_data(uint8_t data[]);
-void         store_ruuvi_reading(uint8_t i, volatile ruuvi_data_t rdata);
-void         store_ruuvi_reading_time(uint8_t i, volatile time_t time);
+
+void store_ruuvi_reading(uint8_t i, volatile ruuvi_data_t rdata);
+void store_ruuvi_reading_time(size_t i, volatile time_t time);

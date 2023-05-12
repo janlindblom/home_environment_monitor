@@ -11,6 +11,7 @@
 
 #include "climate.h"
 #include "common.h"
+#include "configuration.h"
 #include "forecast_types.h"
 #include "network_time.h"
 
@@ -169,12 +170,13 @@ bool day() {
  *
  * \param configuration the parsed config file
  */
-zambretti_forecast_t get_forecast(Config configuration) {
-  int z        = 1;
-  int trend    = current_trend(pressure_trend()).baro_trend;
-  int pressure = int(pressure_to_slp(pa_to_mb(average_pressure()),
-                                     configuration.location.elevation,
-                                     average_temperature()));
+zambretti_forecast_t get_forecast() {
+  Config configuration = get_config();
+  int    z             = 1;
+  int    trend         = current_trend(pressure_trend()).baro_trend;
+  int    pressure      = int(pressure_to_slp(pa_to_mb(average_pressure()),
+                                             configuration.location.elevation,
+                                             average_temperature()));
 
   if (trend > 0) {
     // For a rising barometer Z = 179-P*0.16
@@ -207,8 +209,8 @@ zambretti_forecast_t get_forecast(Config configuration) {
  * \param u8g2 the OLED display
  * \param configuration the processed config file
  */
-void print_forecast_icon(U8G2 u8g2, Config configuration) {
-  zambretti_forecast_t forecast = get_forecast(configuration);
+void print_forecast_icon(U8G2 u8g2) {
+  zambretti_forecast_t forecast = get_forecast();
 
   u8g2.setFont(u8g2_font_siji_t_6x10);
   u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,

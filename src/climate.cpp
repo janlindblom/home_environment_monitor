@@ -10,7 +10,10 @@
 #include <U8g2lib.h>
 #include <time.h>
 
+#include <vector>
+
 #include "common.h"
+#include "configuration.h"
 #include "configuration_types.h"
 #include "forecast.h"
 #include "ruuvi_types.h"
@@ -37,9 +40,13 @@ float get_pressure_trend() {
           pressure_readings[0]);
 }
 
-void process_pressure(ruuvi_data_t ruuvi_readings[],
-                      bool ruuvi_outdoor_sensor[], Config configuration) {
-  float timediff = difftime(time(nullptr), last_pressure);
+void process_pressure(ruuvi_data_t         ruuvi_readings[],
+                      std::vector<uint8_t> ruuvi_outdoor_sensor) {
+  if (!configured()) {
+    return;
+  }
+  Config configuration = get_config();
+  float  timediff      = difftime(time(nullptr), last_pressure);
 
   if ((timediff >= 10800.0f) ||
       ((timediff >= 60.0f) &&
@@ -96,7 +103,7 @@ void log_current_temperature(float temperature, bool location_outdoor = false) {
 }
 
 void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
-                   bool ruuvi_outdoor_sensor[], uint8_t ruuvi_sensor_count) {
+                   std::vector<uint8_t> ruuvi_outdoor_sensor) {
   uint8_t yoffset = 1;
   u8g2.setFont(u8g2_font_helvR08_tf);
   yoffset += u8g2.getMaxCharHeight();
@@ -104,7 +111,7 @@ void print_climate(U8G2 u8g2, ruuvi_data_t ruuvi_readings[],
   float   humidity_readings[]    = {0.0, 0.0};
   uint8_t number_of_readings[]   = {0, 0};
 
-  for (uint8_t i = 0; i < ruuvi_sensor_count; i++) {
+  for (uint8_t i = 0; i < get_config().ruuvi.devices.size(); i++) {
     if (ruuvi_outdoor_sensor[i]) {
       temperature_readings[1] += ruuvi_readings[i].temperature;
       humidity_readings[1] += ruuvi_readings[i].humidity;

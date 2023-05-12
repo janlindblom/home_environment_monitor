@@ -75,7 +75,7 @@ void setup() {
   }
 
   load_config_file();
-  setup_ruuvi_devices(config);
+  setup_ruuvi_devices();
 
   u8g2.setI2CAddress(I2C_ADDRESS << 1);
   u8g2.begin();
@@ -135,12 +135,11 @@ void loop() {
   if (configured() && bluetooth_configured()) {
     print_bluetooth_status(u8g2);
     if (ruuvi_devices_configured()) {
-      process_pressure(ruuvi_readings(), ruuvi_outdoor_sensor(), config);
-      print_climate(u8g2, ruuvi_readings(), ruuvi_outdoor_sensor(),
-                    config.ruuvi.count);
-      print_forecast_icon(u8g2, config);
+      process_pressure(ruuvi_readings(), ruuvi_outdoor_sensor());
+      print_climate(u8g2, ruuvi_readings(), ruuvi_outdoor_sensor());
+      print_forecast_icon(u8g2);
     } else {
-      setup_ruuvi_devices(config);
+      setup_ruuvi_devices();
     }
   }
 
@@ -197,7 +196,7 @@ void advertisementCallback(BLEAdvertisement* adv) {
             Serial.print(F("Zambretti indication: "));
             Serial.println(current_trend(pressure_trend()).indication);
             if (average_pressure() > 0) {
-              zambretti_forecast f = get_forecast(config);
+              zambretti_forecast f = get_forecast();
               Serial.print(F("Forecast: "));
               Serial.print(f.forecast);
               Serial.print(F(": "));

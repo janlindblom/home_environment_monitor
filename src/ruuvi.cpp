@@ -18,31 +18,33 @@
 #include "ruuvi_types.h"
 
 std::vector<BD_ADDR> _ruuvi_devices;
-bool*                _ruuvi_outdoor_sensor;
+std::vector<uint8_t> _ruuvi_outdoor_sensor;
 ruuvi_data_t*        _ruuvi_readings;
-time_t*              _ruuvi_reading_time;
-bool                 _ruuvi_devices_configured = false;
+std::vector<time_t>  _ruuvi_reading_time;
 
-void setup_ruuvi_devices(Config configuration) {
+bool _ruuvi_devices_configured = false;
+
+void setup_ruuvi_devices() {
+  Config configuration      = get_config();
   _ruuvi_devices_configured = false;
   if (configured()) {
-    delete[] _ruuvi_outdoor_sensor;
+    size_t devices = configuration.ruuvi.devices.size();
+
     delete[] _ruuvi_readings;
-    delete[] _ruuvi_reading_time;
 
-    _ruuvi_outdoor_sensor = new bool[configuration.ruuvi.devices.size()];
-    _ruuvi_readings     = new ruuvi_data_t[configuration.ruuvi.devices.size()];
-    _ruuvi_reading_time = new time_t[configuration.ruuvi.devices.size()];
+    _ruuvi_readings = new ruuvi_data_t[devices];
 
-    for (size_t i = 0; i < configuration.ruuvi.devices.size(); i++) {
+    for (size_t i = 0; i < devices; i++) {
       ruuvi_data_t ruuvi_entry;
       _ruuvi_devices.push_back(configuration.ruuvi.devices[i].bt_addr);
-      _ruuvi_outdoor_sensor[i] = (!strcmp(
-          "outdoor", configuration.ruuvi.devices[i].placement.c_str()));
-      _ruuvi_readings[i]       = ruuvi_entry;
-      _ruuvi_reading_time[i]   = 0;
+      _ruuvi_outdoor_sensor.push_back(
+          !strcmp("outdoor", configuration.ruuvi.devices[i].placement.c_str()));
+      _ruuvi_readings[i] = ruuvi_entry;
+      _ruuvi_reading_time.push_back(0);
     }
     _ruuvi_devices.shrink_to_fit();
+    _ruuvi_reading_time.shrink_to_fit();
+    _ruuvi_outdoor_sensor.shrink_to_fit();
     _ruuvi_devices_configured = true;
   }
 }
@@ -71,11 +73,7 @@ bool ruuvi_devices_configured() {
   return _ruuvi_devices_configured;
 }
 
-std::vector<BD_ADDR> ruuvi_devices() {
-  return _ruuvi_devices;
-}
-
-bool* ruuvi_outdoor_sensor() {
+std::vector<uint8_t> ruuvi_outdoor_sensor() {
   return _ruuvi_outdoor_sensor;
 }
 
@@ -87,10 +85,10 @@ void store_ruuvi_reading(uint8_t i, ruuvi_data_t rdata) {
   _ruuvi_readings[i] = rdata;
 }
 
-time_t* ruuvi_reading_times() {
+std::vector<time_t> ruuvi_reading_times() {
   return _ruuvi_reading_time;
 }
 
-void store_ruuvi_reading_time(uint8_t i, time_t time) {
+void store_ruuvi_reading_time(size_t i, time_t time) {
   _ruuvi_reading_time[i] = time;
 }
