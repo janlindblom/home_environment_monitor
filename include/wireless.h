@@ -12,10 +12,9 @@
 
 enum WiFiSignal { AMAZING, GREAT, GOOD, OK, BAD, UNUSABLE };
 
-void control_wireless(Config configuration,
-                      void (*callback)(BLEAdvertisement* bleAdvertisement));
+void control_wireless(void (*callback)(BLEAdvertisement* bleAdvertisement));
 
-void    connect_network(Config configuration);
+void    connect_network();
 void    disconnect_network();
 bool    wifi_ap_configured();
 bool    network_connected();

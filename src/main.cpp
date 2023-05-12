@@ -95,7 +95,7 @@ void setup() {
   u8g2.sendBuffer();
 
   Serial.println(F("Connecting to WiFi..."));
-  connect_network(config);
+  connect_network();
   Serial.println(F("WiFi connection configured."));
   // pir_init();
 }
@@ -116,7 +116,7 @@ void loop() {
   delay(250);
 
   if (configuration_loaded()) {
-    control_wireless(config, advertisementCallback);
+    control_wireless(advertisementCallback);
   }
 
   if (bluetooth_configured()) {
@@ -128,7 +128,7 @@ void loop() {
 
   if (configured()) {
     print_wifi_status(u8g2);
-    print_time(u8g2, config);
+    print_time(u8g2);
   } else {
     load_config_file();
   }

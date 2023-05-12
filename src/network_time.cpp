@@ -32,11 +32,9 @@ SunSet _sun;
 /**
  * Configure the local clock using NTP from the network.
  *
- * \param configuration the parsed config file
- *
  * \todo Show some of these Serial.print's on the OLED instead.
  */
-void configure_network_time(Config configuration) {
+void configure_network_time() {
   if (!network_connected()) {
     return;
   }
@@ -60,7 +58,7 @@ void configure_network_time(Config configuration) {
   time_t now = time(nullptr);
   if (now > 57600) {
     Serial.println(F("NTP time response from network, processing."));
-    const char* tz = lookup_posix_timezone_tz(configuration.timezone.c_str());
+    const char* tz = lookup_posix_timezone_tz(get_config().timezone.c_str());
     Serial.print(F("Setting up timezone: "));
     Serial.println(tz);
     setenv("TZ", tz, 1);
@@ -68,7 +66,7 @@ void configure_network_time(Config configuration) {
 
     Serial.print(F("Time set from network: "));
     Serial.print(asctime(localtime(&now)));
-    configure_sunset(configuration);
+    configure_sunset();
     _network_time_set = true;
   } else {
     Serial.println(F("No good time from network yet, will try again."));
@@ -82,7 +80,7 @@ void configure_network_time(Config configuration) {
  * \param u8g2 the OLED display
  * \param configuration the parsed config file
  */
-void print_time(U8G2 u8g2, Config configuration) {
+void print_time(U8G2 u8g2) {
   if (_network_time_set) {
     time_t    now = time(nullptr);
     struct tm local;
@@ -96,7 +94,7 @@ void print_time(U8G2 u8g2, Config configuration) {
                      (local.tm_mday > 9 ? 2 : 1) + 5];
     uint8_t sunrise_str_offset = 0;
 
-    configure_sunset(configuration);
+    configure_sunset();
     int sunrise = static_cast<int>(_sun.calcSunrise());
     int sunset  = static_cast<int>(_sun.calcSunset());
 
@@ -133,11 +131,10 @@ void print_time(U8G2 u8g2, Config configuration) {
 
 /**
  * Configure the SunSet library with current date and location.
- *
- * \param configuration the parsed config file
  */
-void configure_sunset(Config configuration) {
-  time_t    now = time(nullptr);
+void configure_sunset() {
+  Config    configuration = get_config();
+  time_t    now           = time(nullptr);
   struct tm gmt;
   gmtime_r(&now, &gmt);
   _sun.setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);

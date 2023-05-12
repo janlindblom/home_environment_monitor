@@ -36,16 +36,14 @@ WiFiMulti multi;
  * Controls the wireless hardware state according to the current state of the
  * system.
  *
- * \param configuration the parsed config file
  * \param callback the function called when Bluetooth discovers something
  */
-void control_wireless(Config configuration,
-                      void (*callback)(BLEAdvertisement* bleAdvertisement)) {
+void control_wireless(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
   if (!_network_connected && !network_time_set()) {
     Serial.println(F("No network connection, trying to connect."));
-    connect_network(configuration);
+    connect_network();
   } else if (_network_connected && !network_time_set()) {
-    configure_network_time(configuration);
+    configure_network_time();
   } else if (network_time_set() && _network_connected) {
     Serial.println(F("No more need for network, disconnecting..."));
     disconnect_network();
@@ -62,12 +60,13 @@ void control_wireless(Config configuration,
 /**
  * Connects to WiFi.
  */
-void connect_network(Config configuration) {
+void connect_network() {
   if (!configured() || _network_setup_running || WiFi.connected()) {
     return;
   }
 
   _network_setup_running = true;
+  Config configuration   = get_config();
 
   WiFi.setHostname("envmon");
 

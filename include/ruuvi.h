@@ -15,9 +15,9 @@
 void setup_ruuvi_devices();
 bool ruuvi_devices_configured();
 
-std::vector<uint8_t> ruuvi_outdoor_sensor();
-ruuvi_data_t*        ruuvi_readings();
-std::vector<time_t>  ruuvi_reading_times();
+std::vector<uint8_t>      ruuvi_outdoor_sensor();
+std::vector<ruuvi_data_t> ruuvi_readings();
+std::vector<time_t>       ruuvi_reading_times();
 
 ruuvi_data_t make_ruuvi_data(uint8_t data[]);
 

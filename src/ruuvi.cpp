@@ -17,10 +17,10 @@
 #include "configuration.h"
 #include "ruuvi_types.h"
 
-std::vector<BD_ADDR> _ruuvi_devices;
-std::vector<uint8_t> _ruuvi_outdoor_sensor;
-ruuvi_data_t*        _ruuvi_readings;
-std::vector<time_t>  _ruuvi_reading_time;
+std::vector<BD_ADDR>      _ruuvi_devices;
+std::vector<uint8_t>      _ruuvi_outdoor_sensor;
+std::vector<ruuvi_data_t> _ruuvi_readings;
+std::vector<time_t>       _ruuvi_reading_time;
 
 bool _ruuvi_devices_configured = false;
 
@@ -30,21 +30,22 @@ void setup_ruuvi_devices() {
   if (configured()) {
     size_t devices = configuration.ruuvi.devices.size();
 
-    delete[] _ruuvi_readings;
+    // delete[] _ruuvi_readings;
 
-    _ruuvi_readings = new ruuvi_data_t[devices];
+    //_ruuvi_readings = new ruuvi_data_t[devices];
 
     for (size_t i = 0; i < devices; i++) {
       ruuvi_data_t ruuvi_entry;
       _ruuvi_devices.push_back(configuration.ruuvi.devices[i].bt_addr);
       _ruuvi_outdoor_sensor.push_back(
           !strcmp("outdoor", configuration.ruuvi.devices[i].placement.c_str()));
-      _ruuvi_readings[i] = ruuvi_entry;
+      _ruuvi_readings.push_back(ruuvi_entry);
       _ruuvi_reading_time.push_back(0);
     }
     _ruuvi_devices.shrink_to_fit();
     _ruuvi_reading_time.shrink_to_fit();
     _ruuvi_outdoor_sensor.shrink_to_fit();
+    _ruuvi_readings.shrink_to_fit();
     _ruuvi_devices_configured = true;
   }
 }
@@ -77,7 +78,7 @@ std::vector<uint8_t> ruuvi_outdoor_sensor() {
   return _ruuvi_outdoor_sensor;
 }
 
-ruuvi_data_t* ruuvi_readings() {
+std::vector<ruuvi_data_t> ruuvi_readings() {
   return _ruuvi_readings;
 }
 
