@@ -182,11 +182,10 @@ void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
 
 /**
  * Show Bluetooth status on the OLED.
- *
- * \param u8g2 the OLED display
  */
-void print_bluetooth_status(U8G2 u8g2) {
+void print_bluetooth_status() {
   if (_bluetooth_scanning && !_network_connected) {
+    U8G2 u8g2 = get_display();
     u8g2.setFont(u8g2_font_siji_t_6x10);
     u8g2.drawGlyph(u8g2.getDisplayWidth() - u8g2.getMaxCharWidth() - 1,
                    u8g2.getDisplayHeight() - 1, 57355);

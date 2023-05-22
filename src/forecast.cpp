@@ -206,11 +206,11 @@ zambretti_forecast_t get_forecast() {
  * Print an icon representing the current forecast on the OLED. Displays as a
  * little icon between the wireless indicators and the sunrise/sunset times.
  *
- * \param u8g2 the OLED display
  * \param configuration the processed config file
  */
-void print_forecast_icon(U8G2 u8g2) {
+void print_forecast_icon() {
   zambretti_forecast_t forecast = get_forecast();
+  U8G2                 u8g2     = get_display();
 
   u8g2.setFont(u8g2_font_siji_t_6x10);
   u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,

@@ -128,11 +128,11 @@ void loop() {
   }
 
   if (configured() && bluetooth_configured()) {
-    print_bluetooth_status(u8g2);
+    print_bluetooth_status();
     if (ruuvi_devices_configured()) {
       process_pressure(ruuvi_readings(), ruuvi_outdoor_sensor());
-      print_climate(u8g2, ruuvi_readings(), ruuvi_outdoor_sensor());
-      print_forecast_icon(u8g2);
+      print_climate(ruuvi_readings(), ruuvi_outdoor_sensor());
+      print_forecast_icon();
     } else {
       setup_ruuvi_devices();
     }

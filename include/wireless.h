@@ -30,5 +30,5 @@ bool bluetooth_scanning();
 void ble_start_scanning();
 void ble_stop_scanning();
 void control_bluetooth_scanning();
-void print_bluetooth_status(U8G2 u8g2);
+void print_bluetooth_status();
 void advertisementCallback(BLEAdvertisement* adv);

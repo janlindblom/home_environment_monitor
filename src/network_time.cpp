@@ -78,7 +78,6 @@ void configure_network_time() {
 /**
  * Display the time on the OLED.
  *
- * \param u8g2 the OLED display
  * \param configuration the parsed config file
  */
 void print_time() {

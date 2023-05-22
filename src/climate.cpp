@@ -102,8 +102,9 @@ void log_current_temperature(float temperature, bool location_outdoor = false) {
   EEPROM.update(0 + (location_outdoor * sizeof(float)), temperature);
 }
 
-void print_climate(U8G2 u8g2, std::vector<ruuvi_data_t> ruuvi_readings,
-                   std::vector<uint8_t> ruuvi_outdoor_sensor) {
+void print_climate(std::vector<ruuvi_data_t> ruuvi_readings,
+                   std::vector<uint8_t>      ruuvi_outdoor_sensor) {
+  U8G2    u8g2    = get_display();
   uint8_t yoffset = 1;
   u8g2.setFont(u8g2_font_helvR08_tf);
   yoffset += u8g2.getMaxCharHeight();
