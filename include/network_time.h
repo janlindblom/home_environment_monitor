@@ -20,6 +20,6 @@
 void   configure_network_time();
 bool   network_time_set();
 bool   network_time_received();
-void   print_time(U8G2 u8g2);
+void   print_time();
 void   configure_sunset();
 SunSet sun();

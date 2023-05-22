@@ -46,31 +46,32 @@ void configure_network_time() {
     Serial.println(F("NTP configured. Waiting for time from network."));
   }
 
-  if (NTP.waitSet()) {
-    Serial.println(F("Processing NTP response..."));
-    _network_time_received = true;
-  } else {
-    Serial.println(
-        F("Timeout waiting for network time, will wait for response."));
-    _network_time_received = false;
-  }
+  if (NTP.running()) {
+    if (NTP.waitSet()) {
+      Serial.println(F("Processing NTP response..."));
+      _network_time_received = true;
+    } else {
+      Serial.println(
+          F("Timeout waiting for network time, will wait for response."));
+      _network_time_received = false;
+    }
+    time_t now = time(nullptr);
+    if (now > 57600) {
+      Serial.println(F("NTP time response from network, processing."));
+      const char* tz = lookup_posix_timezone_tz(get_config().timezone.c_str());
+      Serial.print(F("Setting up timezone: "));
+      Serial.println(tz);
+      setenv("TZ", tz, 1);
+      tzset();
 
-  time_t now = time(nullptr);
-  if (now > 57600) {
-    Serial.println(F("NTP time response from network, processing."));
-    const char* tz = lookup_posix_timezone_tz(get_config().timezone.c_str());
-    Serial.print(F("Setting up timezone: "));
-    Serial.println(tz);
-    setenv("TZ", tz, 1);
-    tzset();
-
-    Serial.print(F("Time set from network: "));
-    Serial.print(asctime(localtime(&now)));
-    configure_sunset();
-    _network_time_set = true;
-  } else {
-    Serial.println(F("No good time from network yet, will try again."));
-    _network_time_set = false;
+      Serial.print(F("Time set from network: "));
+      Serial.print(asctime(localtime(&now)));
+      configure_sunset();
+      _network_time_set = true;
+    } else {
+      Serial.println(F("No good time from network yet, will try again."));
+      _network_time_set = false;
+    }
   }
 }
 
@@ -80,9 +81,10 @@ void configure_network_time() {
  * \param u8g2 the OLED display
  * \param configuration the parsed config file
  */
-void print_time(U8G2 u8g2) {
+void print_time() {
   if (_network_time_set) {
-    time_t    now = time(nullptr);
+    U8G2      u8g2 = get_display();
+    time_t    now  = time(nullptr);
     struct tm local;
     localtime_r(&now, &local);
 

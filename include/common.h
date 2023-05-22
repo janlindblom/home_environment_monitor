@@ -4,6 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 #include <Arduino.h>
+#include <U8g2lib.h>
 
 #include "font_segments_12x17.h"
 
@@ -24,3 +25,6 @@
 #  define PIN_LDR_PWR D22
 #  define PIN_PIR D21
 #endif
+
+bool is_filesystem_safe();
+U8G2 get_display();

@@ -72,12 +72,16 @@ void connect_network() {
 
   if (!_wifi_ap_configured) {
     if (configuration.networks.secondary.ssid.length() > 0) {
+      Serial.print("Adding network: ");
+      Serial.println(configuration.networks.secondary.ssid.c_str());
       if (multi.addAP(configuration.networks.secondary.ssid.c_str(),
                       configuration.networks.secondary.password.c_str())) {
         _wifi_ap_configured = true;
       }
     }
     if (configuration.networks.primary.ssid.length() > 0) {
+      Serial.print("Adding network: ");
+      Serial.println(configuration.networks.primary.ssid.c_str());
       if (multi.addAP(configuration.networks.primary.ssid.c_str(),
                       configuration.networks.primary.password.c_str())) {
         _wifi_ap_configured = true;
@@ -120,10 +124,9 @@ uint8_t wifi_signal_rating(int rssi) {
 
 /**
  * Show the current WiFi status on the OLED.
- *
- * \param u8g2 the OLED display
  */
-void print_wifi_status(U8G2 u8g2) {
+void print_wifi_status() {
+  U8G2 u8g2 = get_display();
   if (_network_connected) {
     u8g2.setFont(u8g2_font_siji_t_6x10);
     uint16_t signal_icon = signal_strength[wifi_signal_rating(WiFi.RSSI())];

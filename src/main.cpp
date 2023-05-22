@@ -9,6 +9,7 @@
 #include <LittleFS.h>
 #include <SPI.h>
 #include <SingleFileDrive.h>
+#include <TaskScheduler.h>
 #include <U8g2lib.h>
 #include <Wire.h>
 #include <inttypes.h>
@@ -41,6 +42,8 @@ U8G2_SH1107_64X128_F_HW_I2C u8g2(U8G2_R3);
 
 Config config;
 
+Scheduler ts;
+
 bool _filesystem_safe = true;
 
 void myPlugCB(uint32_t data) {
@@ -54,8 +57,6 @@ void myUnplugCB(uint32_t data) {
 void myDeleteCB(uint32_t data) {
   // Maybe LittleFS.remove("myfile.txt")?  or do nothing
 }
-
-void load_config_file();
 
 /**
  * Main setup routine.
@@ -73,8 +74,9 @@ void setup() {
   if (!Serial) {
     Serial.begin(115200);
   }
-
+  delay(10000);
   load_config_file();
+  config = get_config();
   setup_ruuvi_devices();
 
   u8g2.setI2CAddress(I2C_ADDRESS << 1);
@@ -88,25 +90,17 @@ void setup() {
                splash_logo_width, splash_logo_height, splash_logo_bits);
   u8g2.sendBuffer();
 
-  control_backlight(u8g2);
+  control_backlight();
   delay(1000);
 
   u8g2.clearBuffer();
   u8g2.sendBuffer();
+  ts.init();
 
   Serial.println(F("Connecting to WiFi..."));
   connect_network();
   Serial.println(F("WiFi connection configured."));
   // pir_init();
-}
-
-void load_config_file() {
-  if (_filesystem_safe) {
-    Serial.println(F("Reading configuration..."));
-    load_configuration();
-    Serial.println(F("Configuration loaded."));
-    config = get_config();
-  }
 }
 
 /**
@@ -127,11 +121,12 @@ void loop() {
   u8g2.clearBuffer();
 
   if (configured()) {
-    print_wifi_status(u8g2);
-    print_time(u8g2);
+    print_wifi_status();
+    print_time();
   } else {
     load_config_file();
   }
+
   if (configured() && bluetooth_configured()) {
     print_bluetooth_status(u8g2);
     if (ruuvi_devices_configured()) {
@@ -144,7 +139,7 @@ void loop() {
   }
 
   u8g2.sendBuffer();
-  control_backlight(u8g2);
+  control_backlight();
 }
 
 /**
@@ -207,4 +202,12 @@ void advertisementCallback(BLEAdvertisement* adv) {
       }
     }
   }
+}
+
+bool is_filesystem_safe() {
+  return _filesystem_safe;
+}
+
+U8G2 get_display() {
+  return u8g2;
 }

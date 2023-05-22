@@ -12,4 +12,5 @@ const char json_config[] = "config.json";
 bool   configured();
 bool   configuration_loaded();
 void   load_configuration();
+void   load_config_file();
 Config get_config();

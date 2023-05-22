@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "common.h"
 #include "configuration_types.h"
 
 bool   _configured           = false;
@@ -33,6 +34,14 @@ void parseBytes(const char* str, char sep, byte* bytes, int maxBytes,
       break; // No more separators, exit
     }
     str++; // Point to next character after separator
+  }
+}
+
+void load_config_file() {
+  if (is_filesystem_safe()) {
+    Serial.println(F("Reading configuration..."));
+    load_configuration();
+    Serial.println(F("Configuration loaded."));
   }
 }
 

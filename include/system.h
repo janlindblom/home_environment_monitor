@@ -7,7 +7,7 @@
 #include <U8g2lib.h>
 
 void check_ambient_light();
-void control_backlight(U8G2 u8g2);
+void control_backlight();
 void setup_backlight();
 
 PinStatus pir_state();

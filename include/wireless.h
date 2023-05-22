@@ -21,7 +21,7 @@ bool    network_connected();
 bool    network_disconnected();
 bool    network_setup_running();
 uint8_t wifi_signal_rating(int rssi);
-void    print_wifi_status(U8G2 u8g2);
+void    print_wifi_status();
 
 void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement));
 bool bluetooth_configured();

@@ -40,7 +40,7 @@ void setup_ruuvi_devices() {
       _ruuvi_outdoor_sensor.push_back(
           !strcmp("outdoor", configuration.ruuvi.devices[i].placement.c_str()));
       _ruuvi_readings.push_back(ruuvi_entry);
-      _ruuvi_reading_time.push_back(0);
+      _ruuvi_reading_time.push_back(time(nullptr));
     }
     _ruuvi_devices.shrink_to_fit();
     _ruuvi_reading_time.shrink_to_fit();
