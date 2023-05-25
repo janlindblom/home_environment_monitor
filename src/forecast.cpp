@@ -167,8 +167,6 @@ bool day() {
 
 /**
  * Get a forecast based on the Zambretti algorithm.
- *
- * \param configuration the parsed config file
  */
 zambretti_forecast_t get_forecast() {
   Config configuration = get_config();
@@ -205,8 +203,6 @@ zambretti_forecast_t get_forecast() {
 /**
  * Print an icon representing the current forecast on the OLED. Displays as a
  * little icon between the wireless indicators and the sunrise/sunset times.
- *
- * \param configuration the processed config file
  */
 void print_forecast_icon() {
   zambretti_forecast_t forecast = get_forecast();

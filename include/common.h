@@ -12,8 +12,6 @@
 
 // Display parameters
 #define I2C_ADDRESS 0x3c
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
 // Pin connections
 #ifdef __AVR__

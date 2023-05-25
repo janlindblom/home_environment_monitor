@@ -12,9 +12,8 @@
 typedef struct ruuvi_device {
   std::string name;      // Variable length device name string
   std::string placement; // Variable length device placement string
-  char        address[17];
-  uint8_t     addr[6];
-  BD_ADDR     bt_addr;
+  std::string address;
+  BD_ADDR     addr;
 } ruuvi_device_t;
 
 typedef struct ruuvi_data {

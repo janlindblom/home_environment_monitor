@@ -7,7 +7,6 @@
 
 #include <Arduino.h>
 #include <BTstackLib.h>
-#include <EEPROM.h>
 #include <time.h>
 
 #include <string>
@@ -30,13 +29,9 @@ void setup_ruuvi_devices() {
   if (configured()) {
     size_t devices = configuration.ruuvi.devices.size();
 
-    // delete[] _ruuvi_readings;
-
-    //_ruuvi_readings = new ruuvi_data_t[devices];
-
     for (size_t i = 0; i < devices; i++) {
       ruuvi_data_t ruuvi_entry;
-      _ruuvi_devices.push_back(configuration.ruuvi.devices[i].bt_addr);
+      _ruuvi_devices.push_back(configuration.ruuvi.devices[i].addr);
       _ruuvi_outdoor_sensor.push_back(
           !strcmp("outdoor", configuration.ruuvi.devices[i].placement.c_str()));
       _ruuvi_readings.push_back(ruuvi_entry);

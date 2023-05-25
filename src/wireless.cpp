@@ -13,9 +13,12 @@
 
 #include <string>
 
+#include "climate.h"
 #include "common.h"
 #include "configuration.h"
+#include "forecast.h"
 #include "network_time.h"
+#include "ruuvi.h"
 
 const uint16_t signal_strength[] = {57890, 57889, 57888, 57888, 57887};
 
@@ -35,23 +38,22 @@ WiFiMulti multi;
 /**
  * Controls the wireless hardware state according to the current state of the
  * system.
- *
- * \param callback the function called when Bluetooth discovers something
  */
-void control_wireless(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
+void control_wireless() {
   if (!_network_connected && !network_time_set()) {
     Serial.println(F("No network connection, trying to connect."));
     connect_network();
   } else if (_network_connected && !network_time_set()) {
     configure_network_time();
-  } else if (network_time_set() && _network_connected) {
-    Serial.println(F("No more need for network, disconnecting..."));
+  } else if (network_time_set() && _network_connected &&
+             !_bluetooth_configured) {
+    Serial.println(F("Disabling WiFi to configure Bluetooth..."));
     disconnect_network();
-  } else if ((!_network_connected && network_time_set()) &&
+  } else if (!_network_connected && network_time_set() &&
              !_bluetooth_configured) {
     Serial.println(
         F("Time is set and network disconnected, setting up Bluetooth..."));
-    configure_bluetooth(callback);
+    configure_bluetooth();
   }
 }
 
@@ -77,6 +79,8 @@ void connect_network() {
       if (multi.addAP(configuration.networks.secondary.ssid.c_str(),
                       configuration.networks.secondary.password.c_str())) {
         _wifi_ap_configured = true;
+      } else {
+        _wifi_ap_configured = false;
       }
     }
     if (configuration.networks.primary.ssid.length() > 0) {
@@ -85,6 +89,8 @@ void connect_network() {
       if (multi.addAP(configuration.networks.primary.ssid.c_str(),
                       configuration.networks.primary.password.c_str())) {
         _wifi_ap_configured = true;
+      } else {
+        _wifi_ap_configured = false;
       }
     }
   }
@@ -163,17 +169,15 @@ bool network_setup_running() {
 
 /**
  * Configure the Bluetooth connection.
- *
- * \param callback the callback function for BLE advertisements
  */
-void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement)) {
+void configure_bluetooth() {
   if (_bluetooth_configuring || _bluetooth_configured) {
     return;
   }
 
   Serial.println(F("Configuring Bluetooth..."));
   _bluetooth_configuring = true;
-  BTstack.setBLEAdvertisementCallback(callback);
+  BTstack.setBLEAdvertisementCallback(advertisementCallback);
   BTstack.setup();
   _bluetooth_configured  = true;
   _bluetooth_configuring = false;
@@ -221,9 +225,71 @@ void ble_start_scanning() {
  * Stop scanning for BLE devices.
  */
 void ble_stop_scanning() {
-  comms_timer         = millis();
-  _bluetooth_scanning = false;
+  comms_timer = millis();
   BTstack.bleStopScanning();
+  _bluetooth_scanning = false;
+}
+
+/**
+ * Callback function for BLE Advertisements. Called when a devices is
+ * discovered during BLE device scan.
+ */
+void advertisementCallback(BLEAdvertisement* adv) {
+  char adv_addr[strlen(adv->getBdAddr()->getAddressString())];
+  strcpy(adv_addr, adv->getBdAddr()->getAddressString());
+  if (adv->isIBeacon()) {
+    Serial.print("iBeacon found ");
+    Serial.print(adv->getBdAddr()->getAddressString());
+    Serial.print(", RSSI ");
+    Serial.print(adv->getRssi());
+    Serial.print(", UUID ");
+    Serial.print(adv->getIBeaconUUID()->getUuidString());
+    Serial.print(", MajorID ");
+    Serial.print(adv->getIBeaconMajorID());
+    Serial.print(", MinorID ");
+    Serial.print(adv->getIBecaonMinorID());
+    Serial.print(", Measured Power ");
+    Serial.println(adv->getiBeaconMeasuredPower());
+  } else {
+    if (!configured() || !ruuvi_devices_configured()) {
+      return;
+    }
+
+    for (size_t i = 0; i < get_config().ruuvi.devices.size(); i++) {
+      if (!strcmp(adv_addr,
+                  get_config().ruuvi.devices[i].addr.getAddressString())) {
+        uint8_t data[LE_ADVERTISING_DATA_SIZE];
+        memcpy(data, adv->getAdvData(), LE_ADVERTISING_DATA_SIZE);
+        if ((data[0] != 0x11) && ((data[3] == 0x1B) && (data[4] == 0xFF) &&
+                                  (data[5] == 0x99) && (data[6] == 0x04))) {
+          time_t       now   = time(nullptr);
+          ruuvi_data_t rdata = make_ruuvi_data(data);
+          store_ruuvi_reading(i, rdata);
+          if ((ruuvi_reading_times()[i] == 0) ||
+              difftime(now, ruuvi_reading_times()[i]) >= 360.0f) {
+            Serial.println(
+                F("Six minutes since last logged reading, saving..."));
+            store_ruuvi_reading_time(i, now);
+            Serial.print(F("Logging Ruuvi device: "));
+            Serial.println(get_config().ruuvi.devices[i].name.c_str());
+            Serial.print(F("Current pressure trend: "));
+            Serial.println(pressure_trend());
+            Serial.print(F("Zambretti trend: "));
+            Serial.println(current_trend(pressure_trend()).baro_trend);
+            Serial.print(F("Zambretti indication: "));
+            Serial.println(current_trend(pressure_trend()).indication);
+            if (average_pressure() > 0) {
+              zambretti_forecast f = get_forecast();
+              Serial.print(F("Forecast: "));
+              Serial.print(f.forecast);
+              Serial.print(F(": "));
+              Serial.println(f.description);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 bool bluetooth_configured() {

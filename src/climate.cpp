@@ -6,7 +6,6 @@
 #include "climate.h"
 
 #include <Arduino.h>
-#include <EEPROM.h>
 #include <U8g2lib.h>
 #include <time.h>
 
@@ -16,6 +15,7 @@
 #include "configuration.h"
 #include "configuration_types.h"
 #include "forecast.h"
+#include "ruuvi.h"
 #include "ruuvi_types.h"
 
 float    pressure_trend_data[2] = {0.0f, 0.0f};
@@ -40,8 +40,7 @@ float get_pressure_trend() {
           pressure_readings[0]);
 }
 
-void process_pressure(std::vector<ruuvi_data_t> ruuvi_readings,
-                      std::vector<uint8_t>      ruuvi_outdoor_sensor) {
+void process_pressure() {
   if (!configured()) {
     return;
   }
@@ -55,9 +54,9 @@ void process_pressure(std::vector<ruuvi_data_t> ruuvi_readings,
     uint32_t pressure_sum       = 0;
     uint32_t temperature_sum    = 0;
     for (uint8_t i = 0; i < configuration.ruuvi.count; i++) {
-      if (ruuvi_outdoor_sensor[i]) {
-        pressure_sum += ruuvi_readings[i].pressure;
-        temperature_sum += ruuvi_readings[i].temperature;
+      if (ruuvi_outdoor_sensor()[i]) {
+        pressure_sum += ruuvi_readings()[i].pressure;
+        temperature_sum += ruuvi_readings()[i].temperature;
         number_of_readings++;
       }
     }
@@ -99,11 +98,10 @@ float pressure_trend() {
 }
 
 void log_current_temperature(float temperature, bool location_outdoor = false) {
-  EEPROM.update(0 + (location_outdoor * sizeof(float)), temperature);
+  // EEPROM.update(0 + (location_outdoor * sizeof(float)), temperature);
 }
 
-void print_climate(std::vector<ruuvi_data_t> ruuvi_readings,
-                   std::vector<uint8_t>      ruuvi_outdoor_sensor) {
+void print_climate() {
   U8G2    u8g2    = get_display();
   uint8_t yoffset = 1;
   u8g2.setFont(u8g2_font_helvR08_tf);
@@ -113,13 +111,13 @@ void print_climate(std::vector<ruuvi_data_t> ruuvi_readings,
   uint8_t number_of_readings[]   = {0, 0};
 
   for (uint8_t i = 0; i < get_config().ruuvi.devices.size(); i++) {
-    if (ruuvi_outdoor_sensor[i]) {
-      temperature_readings[1] += ruuvi_readings[i].temperature;
-      humidity_readings[1] += ruuvi_readings[i].humidity;
+    if (ruuvi_outdoor_sensor()[i]) {
+      temperature_readings[1] += ruuvi_readings()[i].temperature;
+      humidity_readings[1] += ruuvi_readings()[i].humidity;
       number_of_readings[1]++;
     } else {
-      temperature_readings[0] += ruuvi_readings[i].temperature;
-      humidity_readings[0] += ruuvi_readings[i].humidity;
+      temperature_readings[0] += ruuvi_readings()[i].temperature;
+      humidity_readings[0] += ruuvi_readings()[i].humidity;
       number_of_readings[0]++;
     }
   }

@@ -61,14 +61,14 @@ void check_ambient_light() {
  * light level and sets the display backlight accordingly.
  */
 void control_backlight() {
+  if ((millis() - light_timer) < 1000) {
+    return;
+  }
   U8G2 u8g2 = get_display();
   if (backlight_on) {
     u8g2.setPowerSave(0);
   } else if (!backlight_on && ((millis() - powersave_timer) >= 20000)) {
     u8g2.setPowerSave(1);
-  }
-  if ((millis() - light_timer) < 1000) {
-    return;
   }
   check_ambient_light();
   light_timer = millis();

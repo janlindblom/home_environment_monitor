@@ -69,15 +69,15 @@ void load_configuration() {
   for (JsonPair network : doc["networks"].as<JsonObject>()) {
     const char* network_key = network.key().c_str(); // "primary", "secondary"
 
-    const char* network_value_ssid     = network.value()["ssid"];
-    const char* network_value_password = network.value()["password"];
-
     if (!strcmp(network_key, "primary")) {
-      _config.networks.primary.ssid     = std::string(network_value_ssid);
-      _config.networks.primary.password = std::string(network_value_password);
+      _config.networks.primary.ssid = network.value()["ssid"].as<std::string>();
+      _config.networks.primary.password =
+          network.value()["password"].as<std::string>();
     } else if (!strcmp(network_key, "secondary")) {
-      _config.networks.secondary.ssid     = std::string(network_value_ssid);
-      _config.networks.secondary.password = std::string(network_value_password);
+      _config.networks.secondary.ssid =
+          network.value()["ssid"].as<std::string>();
+      _config.networks.secondary.password =
+          network.value()["password"].as<std::string>();
     }
   }
 
@@ -94,23 +94,17 @@ void load_configuration() {
   for (JsonObject ruuvi_device : doc["ruuvi"]["devices"].as<JsonArray>()) {
     ruuvi_device_t device;
 
-    const char* device_name = ruuvi_device["name"];
-    device.name             = std::string(device_name);
+    device.name      = ruuvi_device["name"].as<std::string>();
+    device.placement = ruuvi_device["placement"].as<std::string>();
+    device.address   = ruuvi_device["address"].as<std::string>();
 
-    const char* device_placement = ruuvi_device["placement"];
-    device.placement             = std::string(device_placement);
+    // uint8_t addr[6];
+    // parseBytes(ruuvi_device["address"], ':', addr, 6, 16);
+    //  device.addr = BD_ADDR(addr);
 
-    const char* device_address = ruuvi_device["address"];
-    strncpy(device.address, device_address, sizeof(device.address));
-
-    uint8_t addr[6];
-    parseBytes(ruuvi_device["address"], ':', addr, 6, 16);
-    // device.bt_addr = BD_ADDR(addr);
-    // This depends on PR#1440 to be merged into arduino-pico otherwise, use the
-    // line above.
-    device.bt_addr = BD_ADDR(device.address);
-    memcpy(device.addr, addr, sizeof(device.addr));
-    //_config.ruuvi.devices[device_number] = device;
+    //  This depends on PR#1440 to be merged into arduino-pico otherwise, use
+    //  the line above.
+    device.addr = BD_ADDR(ruuvi_device["address"].as<const char*>());
     _config.ruuvi.devices.push_back(device);
     device_number++;
   }

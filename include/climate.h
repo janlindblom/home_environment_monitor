@@ -11,10 +11,8 @@
 #include "configuration_types.h"
 #include "ruuvi_types.h"
 
-void print_climate(std::vector<ruuvi_data_t> ruuvi_readings,
-                   std::vector<uint8_t>      ruuvi_outdoor_sensor);
-void process_pressure(std::vector<ruuvi_data_t> ruuvi_readings,
-                      std::vector<uint8_t>      ruuvi_outdoor_sensor);
+void print_climate();
+void process_pressure();
 
 void log_current_temperature(float temperature, bool location_outdoor);
 

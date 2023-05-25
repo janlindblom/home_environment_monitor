@@ -12,7 +12,7 @@
 
 enum WiFiSignal { AMAZING, GREAT, GOOD, OK, BAD, UNUSABLE };
 
-void control_wireless(void (*callback)(BLEAdvertisement* bleAdvertisement));
+void control_wireless();
 
 void    connect_network();
 void    disconnect_network();
@@ -23,7 +23,7 @@ bool    network_setup_running();
 uint8_t wifi_signal_rating(int rssi);
 void    print_wifi_status();
 
-void configure_bluetooth(void (*callback)(BLEAdvertisement* bleAdvertisement));
+void configure_bluetooth();
 bool bluetooth_configured();
 bool bluetooth_configuring();
 bool bluetooth_scanning();
