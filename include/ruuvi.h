@@ -9,7 +9,6 @@
 
 #include <vector>
 
-#include "configuration_types.h"
 #include "ruuvi_types.h"
 
 void setup_ruuvi_devices();

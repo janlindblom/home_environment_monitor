@@ -28,7 +28,6 @@
 #include "forecast.h"
 #include "network_time.h"
 #include "ruuvi.h"
-#include "ruuvi_types.h"
 #include "splash_logo.h"
 #include "system.h"
 #include "wireless.h"

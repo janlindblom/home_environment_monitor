@@ -8,8 +8,6 @@
 #include <U8g2lib.h>
 #include <WiFi.h>
 
-#include "configuration_types.h"
-
 enum WiFiSignal { AMAZING, GREAT, GOOD, OK, BAD, UNUSABLE };
 
 void control_wireless();
