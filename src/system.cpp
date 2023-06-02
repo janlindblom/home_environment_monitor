@@ -5,7 +5,7 @@
 
 #include "system.h"
 
-#include <Common.h>
+#include <common.h>
 #include <U8g2lib.h>
 #include <inttypes.h>
 
