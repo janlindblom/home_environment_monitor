@@ -20,10 +20,8 @@
 #include "configuration_types.h"
 #include "wireless.h"
 
-const char* weekdays[] PROGMEM = {"Söndag",  "Måndag", "Tisdag", "Onsdag",
-                                  "Torsdag", "Fredag", "Lördag"};
-const char* months[] PROGMEM   = {"jan", "feb", "mar", "apr", "maj", "jun",
-                                  "jul", "aug", "sep", "okt", "nov", "dec"};
+const char* weekdays[7] PROGMEM = {"Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"};
+const char* months[12] PROGMEM  = {"jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"};
 
 bool _network_time_set      = false;
 bool _network_time_received = false;
@@ -53,8 +51,7 @@ void configure_network_time() {
       Serial.println(F("Processing NTP response..."));
       _network_time_received = true;
     } else {
-      Serial.println(
-          F("Timeout waiting for network time, will wait for response."));
+      Serial.println(F("Timeout waiting for network time, will wait for response."));
       _network_time_received = false;
     }
     time_t now = time(nullptr);
@@ -90,12 +87,10 @@ void print_time() {
     struct tm local;
     localtime_r(&now, &local);
 
-    char    sunrise_string[6];
-    char    sunset_string[7];
-    char    time_string[5];
-    char    date_string[strlen(weekdays[local.tm_wday]) +
-                     strlen(months[local.tm_mon]) +
-                     (local.tm_mday > 9 ? 2 : 1) + 5];
+    char sunrise_string[6];
+    char sunset_string[7];
+    char time_string[5];
+    char date_string[strlen(weekdays[local.tm_wday]) + strlen(months[local.tm_mon]) + (local.tm_mday > 9 ? 2 : 1) + 5];
     uint8_t sunrise_str_offset = 0;
 
     configure_sunset();
@@ -103,13 +98,12 @@ void print_time() {
     int sunset  = static_cast<int>(_sun.calcSunset());
 
     u8g2.setFont(u8g2_font_helvR08_tf);
-    sprintf(date_string, "%s %d %s %4d", weekdays[local.tm_wday], local.tm_mday,
-            months[local.tm_mon], (local.tm_year + 1900));
+    sprintf(date_string, "%s %d %s %4d", weekdays[local.tm_wday], local.tm_mday, months[local.tm_mon],
+            (local.tm_year + 1900));
     u8g2.drawUTF8(0, u8g2.getMaxCharHeight(), date_string);
     u8g2.setFont(u8g2_font_helvB08_tf);
     sprintf(time_string, "%02d:%02d", local.tm_hour, local.tm_min);
-    u8g2.drawStr((u8g2.getDisplayWidth() - u8g2.getStrWidth(time_string)),
-                 u8g2.getMaxCharHeight(), time_string);
+    u8g2.drawStr((u8g2.getDisplayWidth() - u8g2.getStrWidth(time_string)), u8g2.getMaxCharHeight(), time_string);
 
     u8g2.setFont(u8g2_font_open_iconic_weather_1x_t);
     // Sun icon
@@ -118,8 +112,7 @@ void print_time() {
 
     u8g2.setFont(u8g2_font_helvR08_tf);
     sprintf(sunrise_string, "%02d:%02d ", (sunrise / 60) % 24, (sunrise % 60));
-    u8g2.drawStr(sunrise_str_offset, u8g2.getDisplayHeight() - 1,
-                 sunrise_string);
+    u8g2.drawStr(sunrise_str_offset, u8g2.getDisplayHeight() - 1, sunrise_string);
     sunrise_str_offset += u8g2.getStrWidth(sunrise_string);
     u8g2.setFont(u8g2_font_open_iconic_weather_1x_t);
     // Moon icon
@@ -128,8 +121,7 @@ void print_time() {
 
     u8g2.setFont(u8g2_font_helvR08_tf);
     sprintf(sunset_string, "%02d:%02d", (sunset / 60) % 24, (sunset % 60));
-    u8g2.drawStr(sunrise_str_offset, u8g2.getDisplayHeight() - 1,
-                 sunset_string);
+    u8g2.drawStr(sunrise_str_offset, u8g2.getDisplayHeight() - 1, sunset_string);
   }
 }
 
@@ -144,19 +136,15 @@ void configure_sunset() {
   gmtime_r(&now, &gmt);
   gmtime_r(&_sunset_configured_time, &last_configured);
   if ((_sunset_configured_time < 57600) ||
-      ((last_configured.tm_year != gmt.tm_year) &&
-       (last_configured.tm_mon != gmt.tm_mon) &&
+      ((last_configured.tm_year != gmt.tm_year) && (last_configured.tm_mon != gmt.tm_mon) &&
        (last_configured.tm_mday != gmt.tm_mday))) {
     Serial.print(F("SunSet Library setting current date:"));
-    Serial.printf("%d, %d, %d\n", gmt.tm_year + 1900, gmt.tm_mon + 1,
-                  gmt.tm_mday);
+    Serial.printf("%d, %d, %d\n", gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
     Serial.print(F("SunSet Library setting location:"));
-    Serial.printf("%.4f, %.4f, %.1f\n", configuration.location.latitude,
-                  configuration.location.longitude,
+    Serial.printf("%.4f, %.4f, %.1f\n", configuration.location.latitude, configuration.location.longitude,
                   configuration.location.tz_offset);
     _sun.setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
-    _sun.setPosition(configuration.location.latitude,
-                     configuration.location.longitude,
+    _sun.setPosition(configuration.location.latitude, configuration.location.longitude,
                      configuration.location.tz_offset);
     _sunset_configured_time = now;
   }

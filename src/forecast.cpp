@@ -16,55 +16,46 @@
 #include "network_time.h"
 
 const pressure_change_t change_slp[9] PROGMEM = {
-    {6.0f, "Rising Very Rapidly", 4},
-    {3.6f, "Rising Quickly", 3},
-    {1.6f, "Rising", 2},
-    {0.1f, "Rising Slowly", 1},
-    {-0.1f, "Steady", 0},
-    {-1.6f, "Falling Slowly", -1},
-    {-3.6f, "Falling", -2},
-    {-6.0f, "Falling Quickly", -3},
-    {-6.0f, "Falling Very Rapidly", -4}};
+    {6.0f, "Rising Very Rapidly", 4}, {3.6f, "Rising Quickly", 3},    {1.6f, "Rising", 2},
+    {0.1f, "Rising Slowly", 1},       {-0.1f, "Steady", 0},           {-1.6f, "Falling Slowly", -1},
+    {-3.6f, "Falling", -2},           {-6.0f, "Falling Quickly", -3}, {-6.0f, "Falling Very Rapidly", -4}};
 
-char* forecast_strings[4] PROGMEM = {"Settled Fine", "Fine Weather",
-                                     "Very Unsettled, Rain",
-                                     "Stormy, much rain"};
+char* forecast_strings[4] PROGMEM = {"Settled Fine", "Fine Weather", "Very Unsettled, Rain", "Stormy, much rain"};
 
-const zambretti_forecast_t forecast[32] PROGMEM = {
-    {'A', forecast_strings[0]},
-    {'B', forecast_strings[1]},
-    {'D', "Fine Becoming Less Settled"},
-    {'H', "Fairly Fine Showery Later"},
-    {'O', "Showery Becoming more unsettled"},
-    {'R', "Unsettled, Rain later"},
-    {'U', "Rain at times, worse later"},
-    {'V', "Rain at times, becoming very unsettled"},
-    {'X', forecast_strings[2]},
+const zambretti_forecast_t forecast[32] PROGMEM = {{'A', forecast_strings[0]},
+                                                   {'B', forecast_strings[1]},
+                                                   {'D', "Fine Becoming Less Settled"},
+                                                   {'H', "Fairly Fine Showery Later"},
+                                                   {'O', "Showery Becoming more unsettled"},
+                                                   {'R', "Unsettled, Rain later"},
+                                                   {'U', "Rain at times, worse later"},
+                                                   {'V', "Rain at times, becoming very unsettled"},
+                                                   {'X', forecast_strings[2]},
 
-    {'A', forecast_strings[0]},
-    {'B', forecast_strings[1]},
-    {'E', "Fine, Possibly showers"},
-    {'K', "Fairly Fine, Showers likely"},
-    {'N', "Showery Bright Intervals"},
-    {'P', "Changeable some rain"},
-    {'S', "Unsettled, rain at times"},
-    {'W', "Rain at Frequent Intervals"},
-    {'X', forecast_strings[2]},
-    {'Z', forecast_strings[3]},
+                                                   {'A', forecast_strings[0]},
+                                                   {'B', forecast_strings[1]},
+                                                   {'E', "Fine, Possibly showers"},
+                                                   {'K', "Fairly Fine, Showers likely"},
+                                                   {'N', "Showery Bright Intervals"},
+                                                   {'P', "Changeable some rain"},
+                                                   {'S', "Unsettled, rain at times"},
+                                                   {'W', "Rain at Frequent Intervals"},
+                                                   {'X', forecast_strings[2]},
+                                                   {'Z', forecast_strings[3]},
 
-    {'A', forecast_strings[0]},
-    {'B', forecast_strings[1]},
-    {'C', "Becoming Fine"},
-    {'F', "Fairly Fine, Improving"},
-    {'G', "Fairly Fine, Possibly showers, early"},
-    {'I', "Showery Early, Improving"},
-    {'J', "Changeable Mending"},
-    {'L', "Rather Unsettled Clearing Later"},
-    {'M', "Unsettled, Probably Improving"},
-    {'Q', "Unsettled, short fine Intervals"},
-    {'T', "Very Unsettled, Finer at times"},
-    {'Y', "Stormy, possibly improving"},
-    {'Z', forecast_strings[3]}};
+                                                   {'A', forecast_strings[0]},
+                                                   {'B', forecast_strings[1]},
+                                                   {'C', "Becoming Fine"},
+                                                   {'F', "Fairly Fine, Improving"},
+                                                   {'G', "Fairly Fine, Possibly showers, early"},
+                                                   {'I', "Showery Early, Improving"},
+                                                   {'J', "Changeable Mending"},
+                                                   {'L', "Rather Unsettled Clearing Later"},
+                                                   {'M', "Unsettled, Probably Improving"},
+                                                   {'Q', "Unsettled, short fine Intervals"},
+                                                   {'T', "Very Unsettled, Finer at times"},
+                                                   {'Y', "Stormy, possibly improving"},
+                                                   {'Z', forecast_strings[3]}};
 
 enum icon_name {
   CLOUDY = 0,
@@ -100,9 +91,7 @@ float pa_to_mb(uint32_t pressure_pa) {
  */
 float pressure_to_slp(float pressure, int16_t elevation, float temperature) {
   // Use single precision floating point since double precision is slower.
-  return pressure * pow(1 - 0.0065f * elevation /
-                                (temperature + 0.0065f * elevation + 273.15f),
-                        -5.275f);
+  return pressure * pow(1 - 0.0065f * elevation / (temperature + 0.0065f * elevation + 273.15f), -5.275f);
 }
 
 /**
@@ -161,8 +150,7 @@ bool day() {
   sun().setCurrentDate(gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday);
   int sunrise = static_cast<int>(sun().calcSunrise());
   int sunset  = static_cast<int>(sun().calcSunset());
-  return ((local.tm_hour * 60 + local.tm_min >= sunrise) &&
-          (local.tm_hour * 60 + local.tm_min < sunset));
+  return ((local.tm_hour * 60 + local.tm_min >= sunrise) && (local.tm_hour * 60 + local.tm_min < sunset));
 }
 
 /**
@@ -172,9 +160,8 @@ zambretti_forecast_t get_forecast() {
   Config configuration = get_config();
   int    z             = 1;
   int    trend         = current_trend(pressure_trend()).baro_trend;
-  int    pressure      = int(pressure_to_slp(pa_to_mb(average_pressure()),
-                                             configuration.location.elevation,
-                                             average_temperature()));
+  int    pressure =
+      int(pressure_to_slp(pa_to_mb(average_pressure()), configuration.location.elevation, average_temperature()));
 
   if (trend > 0) {
     // For a rising barometer Z = 179-P*0.16
@@ -208,9 +195,8 @@ void print_forecast_icon() {
   zambretti_forecast_t forecast = get_forecast();
   U8G2                 u8g2     = get_display();
 
-  u8g2.setFont(u8g2_font_siji_t_6x10);
-  u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1,
-                 u8g2.getDisplayHeight() - 1,
+  u8g2.setFont(u8g2_font_waffle_t_all);
+  u8g2.drawGlyph(u8g2.getDisplayWidth() - (2 * u8g2.getMaxCharWidth()) - 1, u8g2.getDisplayHeight() - 1,
                  forecast_icon(forecast.forecast, day()));
 }
 

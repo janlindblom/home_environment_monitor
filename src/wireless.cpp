@@ -22,7 +22,7 @@
 #include "network_time.h"
 #include "ruuvi.h"
 
-const uint16_t signal_strength[] = {57890, 57889, 57888, 57888, 57887};
+const uint16_t signal_strength[5] PROGMEM = {57890, 57889, 57888, 57888, 57887};
 
 bool _wifi_ap_configured    = false;
 bool _network_connected     = false;

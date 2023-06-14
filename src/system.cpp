@@ -5,20 +5,21 @@
 
 #include "system.h"
 
-#include <common.h>
 #include <U8g2lib.h>
+#include <common.h>
 #include <inttypes.h>
 
 #include "common.h"
 
-uint8_t   _ambient_light  = 255;
-uint16_t  adc_min         = 0; // Set this one to something else if you want.
-uint16_t  adc_max         = 1023;
-uint32_t  light_timer     = 0;
-uint32_t  powersave_timer = 0;
-bool      backlight_on    = true;
-PinStatus _pir_state      = PinStatus::LOW;
-
+uint8_t   _ambient_light    = 255;
+uint16_t  adc_min           = 0; // Set this one to something else if you want.
+uint16_t  adc_max           = 1023;
+uint32_t  light_timer       = 0;
+uint32_t  powersave_timer   = 0;
+bool      backlight_on      = true;
+PinStatus _pir_state        = PinStatus::LOW;
+uint32_t  watchdog_timer    = 0;
+bool      _watchdog_running = false;
 /**
  * Reads a LDR connected between pins PIN_LDR_PWR and PIN_LDR. Stores the
  * reading as an unsigned 8 bit integer.
@@ -113,10 +114,26 @@ PinStatus pir_status() {
 
 void pir_init() {
   pinMode(PIN_PIR, PinMode::INPUT);
-  attachInterrupt(digitalPinToInterrupt(PIN_PIR), pir_triggered,
-                  PinStatus::CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_PIR), pir_triggered, PinStatus::CHANGE);
 }
 
 void pir_deinit() {
   detachInterrupt(digitalPinToInterrupt(PIN_PIR));
+}
+
+void start_watchdog() {
+  watchdog_timer = millis();
+  rp2040.wdt_begin(8000);
+  _watchdog_running = true;
+}
+
+void feed_watchdog() {
+  if ((millis() - watchdog_timer) >= 5000) {
+    rp2040.wdt_reset();
+    watchdog_timer = millis();
+  }
+}
+
+bool watchdog_running() {
+  return _watchdog_running;
 }

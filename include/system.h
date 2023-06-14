@@ -9,6 +9,9 @@
 void check_ambient_light();
 void control_backlight();
 void setup_backlight();
+void start_watchdog();
+void feed_watchdog();
+bool watchdog_running();
 
 PinStatus pir_state();
 void      pir_init();

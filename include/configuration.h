@@ -7,7 +7,7 @@
 
 #include "configuration_types.h"
 
-const char json_config[] = "config.json";
+const char json_config[] PROGMEM = "config.json";
 
 bool   configured();
 bool   configuration_loaded();

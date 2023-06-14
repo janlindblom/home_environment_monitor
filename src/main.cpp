@@ -66,7 +66,7 @@ void setup() {
   if (!Serial) {
     Serial.begin(115200);
   }
-  // delay(10000);
+  delay(10000);
   load_config_file();
   config = get_config();
   setup_ruuvi_devices();
@@ -78,8 +78,8 @@ void setup() {
 
   u8g2.clearBuffer();
   u8g2.drawXBM((u8g2.getDisplayWidth() >> 1) - (splash_logo_width >> 1),
-               (u8g2.getDisplayHeight() >> 1) - (splash_logo_height >> 1),
-               splash_logo_width, splash_logo_height, splash_logo_bits);
+               (u8g2.getDisplayHeight() >> 1) - (splash_logo_height >> 1), splash_logo_width, splash_logo_height,
+               splash_logo_bits);
   u8g2.sendBuffer();
 
   control_backlight();
@@ -100,12 +100,21 @@ void setup() {
 void loop() {
   delay(250);
 
+  if (watchdog_running()) {
+    // Make sure we feed the watchdog if it's running.
+    feed_watchdog();
+  }
+
   if (configuration_loaded()) {
     control_wireless();
   }
 
   if (bluetooth_configured()) {
     control_bluetooth_scanning();
+    // Once BLE is configured, also start the watchdog if not running.
+    if (!watchdog_running()) {
+      start_watchdog();
+    }
   }
 
   u8g2.setFont(u8g2_font_helvR08_tf);
